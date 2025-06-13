@@ -1,0 +1,36 @@
+# Ignore environment/config files
+.env
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore system files
+.DS_Store
+
+# Ignore virtual environments
+.venv/
+.venv
+env/
+venv/
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore data and logs
+# *.log
+# *.csv
+# *.json
+# *.h5
+*.pth
+# *.pt
+# data/
+logs/
+checkpoints/
+
+# If you have model files
+*.onnx
+*.pb
+
+mvp_pipeline.py
