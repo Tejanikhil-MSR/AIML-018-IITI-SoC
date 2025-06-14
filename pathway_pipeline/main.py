@@ -1,5 +1,7 @@
+import dotenv
+import os
+
 import pathway as pw
-from config import DATA_PATH, DEVICE
 from data_ingestion import read_documents
 from embedding import get_embedder
 from parsing import get_parser
