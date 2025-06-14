@@ -9,6 +9,14 @@ from serving import setup_webserver, setup_rest_connector, QuerySchema
 from prompts import build_prompts_udf
 from pathway.xpacks.llm import llms
 
+DATA_PATH = os.getenv("pathway_monitoring_folder")
+use_gpu = os.getenv("USE_GPU")
+if(use_gpu == "true"):
+    DEVICE = "gpu"
+else:
+    DEVICE = "cpu"
+
+
 # Ingest documents
 documents = read_documents(DATA_PATH)
 
