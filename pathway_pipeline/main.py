@@ -35,6 +35,7 @@ document_store = get_document_store(documents, retriever_factory, parser, splitt
 webserver = setup_webserver()
 queries, writer = setup_rest_connector(webserver)
 
+# from the queries table select the 
 queries = queries.select(query=pw.this.messages, k=1, metadata_filter=None, filepath_globpattern=None)
 
 retrieved_documents = document_store.retrieve_query(queries)
