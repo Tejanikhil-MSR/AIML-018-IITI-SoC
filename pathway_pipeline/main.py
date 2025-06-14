@@ -1,4 +1,4 @@
-import dotenv
+from dotenv import load_dotenv
 import os
 
 import pathway as pw
@@ -10,6 +10,8 @@ from retrieval import get_retriever_factory, get_document_store
 from serving import setup_webserver, setup_rest_connector, QuerySchema
 from prompts import build_prompts_udf
 from pathway.xpacks.llm import llms
+
+loadenv()
 
 DATA_PATH = os.getenv("pathway_monitoring_folder")
 use_gpu = os.getenv("USE_GPU")
