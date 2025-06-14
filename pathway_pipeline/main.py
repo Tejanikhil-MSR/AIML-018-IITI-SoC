@@ -11,7 +11,7 @@ from serving import setup_webserver, setup_rest_connector, QuerySchema
 from prompts import build_prompts_udf
 from pathway.xpacks.llm import llms
 
-loadenv()
+load_dotenv()
 
 DATA_PATH = os.getenv("pathway_monitoring_folder")
 use_gpu = os.getenv("USE_GPU")
@@ -35,12 +35,7 @@ document_store = get_document_store(documents, retriever_factory, parser, splitt
 webserver = setup_webserver()
 queries, writer = setup_rest_connector(webserver)
 
-queries = queries.select(
-    query=pw.this.messages,
-    k=1,
-    metadata_filter=None,
-    filepath_globpattern=None,
-)
+queries = queries.select(query=pw.this.messages, k=1, metadata_filter=None, filepath_globpattern=None)
 
 retrieved_documents = document_store.retrieve_query(queries)
 retrieved_documents = retrieved_documents.select(docs=pw.this.result)
