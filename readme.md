@@ -26,3 +26,5 @@ python data_preparation/scraper.py
 ```bash
 python pathway_pipeline/main.py
 
+### 4. To test
+curl -X POST http://localhost:8011      -H "Content-Type: application/json"      -d '{"messages": "<YOUR-MESSAGE>"}'
