@@ -13,8 +13,8 @@ from pathway.xpacks.llm import llms
 
 load_dotenv()
 
-DATA_PATH = os.getenv("../data/")
-use_gpu = os.getenv("USE_GPU")
+DATA_PATH = "/home/jatin-sharma/Desktop/IITSoC/AIML-018-IITI-SoC/data"
+use_gpu = False
 if(use_gpu == "true"):
     DEVICE = "gpu"
 else:
@@ -36,14 +36,48 @@ webserver = setup_webserver()
 queries, writer = setup_rest_connector(webserver)
 
 # from the queries table select the 
-queries = queries.select(query=pw.this.messages, k=1, metadata_filter=None, filepath_globpattern=None)
+# queries = queries.select(query=pw.this.messages, k=1, metadata_filter=None, filepath_globpattern=None)
 
-retrieved_documents = document_store.retrieve_query(queries)
+
+conversation_memory = queries.select(
+    session_id=pw.this.session_id,
+    message=pw.this.messages
+)
+
+grouped_memory = (
+    conversation_memory
+    .groupby(pw.this.session_id)
+    .reduce(
+        session_id=pw.this.session_id,
+        history=pw.reducers.join_strings(pw.this.message, separator="\n")
+    )
+)
+
+queries_with_history = queries.join(
+    grouped_memory, on=pw.this.session_id == grouped_memory.session_id
+)
+
+
+# Now: queries_with_history has: session_id, messages, history
+queries_contextual = queries_with_history.select(
+    query=pw.this.messages,
+    history=pw.this.history,
+    k=1,
+    metadata_filter=None,
+    filepath_globpattern=None
+)
+
+# queries  = queries_contextual +queries
+retrieved_documents = document_store.retrieve_query(queries_contextual)
 retrieved_documents = retrieved_documents.select(docs=pw.this.result)
-queries_context = queries + retrieved_documents
+queries_contextual = queries_contextual + retrieved_documents
 
-prompts_with_context = queries_context.with_columns(
-    prompt=build_prompts_udf(pw.this.docs, pw.this.query)
+
+# prompts_with_context = queries_context.with_columns(
+#     prompt=build_prompts_udf(pw.this.docs, pw.this.query)
+# )
+prompts_with_context = queries_contextual.with_columns(
+    prompt=build_prompts_udf(pw.this.docs, pw.this.query, pw.this.history)
 )
 
 model = llms.HFPipelineChat(
@@ -51,9 +85,22 @@ model = llms.HFPipelineChat(
     device=DEVICE
 )
 
+# responses = prompts_with_context.with_columns(
+#     result=model(llms.prompt_chat_single_qa(pw.this.prompt))
+# )
+
 responses = prompts_with_context.with_columns(
     result=model(llms.prompt_chat_single_qa(pw.this.prompt))
 )
+
+# Add response back to conversation memory
+new_conversation_entries = responses.select(
+    session_id=pw.this.session_id,
+    message=pw.this.query + "\n" + pw.this.result  # both question and response
+)
+
+# Combine old and new memory
+conversation_memory += new_conversation_entries  # pseudo-code; use Pathway ops
 
 writer(responses)
 pw.run()
