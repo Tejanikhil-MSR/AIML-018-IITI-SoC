@@ -76,6 +76,13 @@ streamlit run App/app.py
 
 Open your browser at [http://localhost:8501](http://localhost:8501)
 
+---
+
+## 📊 Dataset
+
+The dataset can be accessed here:  
+👉 [IITI QA Dataset (Google Drive)](https://drive.google.com/drive/folders/1ubBSaZ34idOf1ZyN_RhGli2YiKKV3Czw)
+
 
 ---
 
