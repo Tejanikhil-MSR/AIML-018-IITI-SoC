@@ -5,15 +5,19 @@ from prometheus_eval.prompts import ABSOLUTE_PROMPT
 model = VLLM(model="prometheus-eval/prometheus-7b-v2.0")
 judge = PrometheusEval(model=model, absolute_grade_template=ABSOLUTE_PROMPT)
 
-instruction = "Explain gravity to a 10-year-old."
-response = "Gravity is what pulls things down to Earth, like when you drop your toy."
-reference_answer = "Gravity is a force that pulls objects toward each other. It's what makes things fall to the ground."
+instruction = " "
+response = " "
+reference_answer = " "
 
 rubric = """
-Criteria: Simplicity and clarity in explanation for a child.
-1: Confusing, technical, not suitable for kids.
-3: Understandable, but lacks clarity or vividness.
-5: Clear, simple, and age-appropriate.
+Criteria: Given a student's query, the chatbot's response
+1. Accuracy (1–5)
+2. Groundedness (1–5)
+3. Relevance (1–5)
+4. Completeness (1–5)
+5. Conciseness (1–5)
+6. Fluency (1–5)
+7. Hallucination (Yes/No)
 """
 
 feedback, score = judge.single_absolute_grade(
