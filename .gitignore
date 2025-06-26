@@ -34,3 +34,8 @@ checkpoints/
 *.pb
 
 mvp_pipeline.py
+data_clean_50
+data_clean_total
+data/dataset-20250624T183251Z-1-001
+data/dataset-20250624T183251Z-1-002
+text_op

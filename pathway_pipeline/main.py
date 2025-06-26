@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-
+import time
 import pathway as pw
 from data_ingestion import read_documents
 from embedding import get_embedder
@@ -13,24 +13,44 @@ from pathway.xpacks.llm import llms
 
 load_dotenv()
 
-DATA_PATH = os.getenv("../data/")
-use_gpu = os.getenv("USE_GPU")
-if(use_gpu == "true"):
-    DEVICE = "gpu"
-else:
-    DEVICE = "cpu"
+DATA_PATH = "/home/saranshvashistha/workspace/AIML-018-IITI-SoC/data_clean_50"
+# use_gpu = os.getenv("USE_GPU")
+# if(use_gpu == "true"):
+DEVICE = "cuda:0"
+# else:
+    # DEVICE = "cpu"
 
 
 # Ingest documents
+print("Starting document loading...")
+start_load_time = time.time()
 documents = read_documents(DATA_PATH)
+end_load_time = time.time()
+print(f"Document loading completed in: {end_load_time - start_load_time:.2f} seconds")
+
+
+
+print("Setting up document processing components...")
+start_setup_time = time.time()
 
 # Set up pipeline components
 embedder = get_embedder(device=DEVICE)
 retriever_factory = get_retriever_factory(embedder)
 parser = get_parser()
 splitter = get_splitter()
+
+end_setup_time = time.time()
+print(f"Component setup completed in: {end_setup_time - start_setup_time:.2f} seconds")
+
+# Create document store with timing
+print("Creating document store and processing documents...")
+start_docstore_time = time.time()
+
 document_store = get_document_store(documents, retriever_factory, parser, splitter)
 
+
+end_docstore_time = time.time()
+print(f"Document store creation and document processing completed in: {end_docstore_time - start_docstore_time:.2f} seconds")
 # Set up webserver and REST connector
 webserver = setup_webserver()
 queries, writer = setup_rest_connector(webserver)
@@ -56,4 +76,7 @@ responses = prompts_with_context.with_columns(
 )
 
 writer(responses)
-pw.run()
+pw.run( #debug=True,                           # Enable debug output
+    #monitoring_level=pw.MonitoringLevel.NONE,  # Disable monitoring dashboard
+     default_logging=True,                 # Keep default logging (optional)
+    terminate_on_error=False  )
