@@ -12,6 +12,6 @@ def get_bot_response(user_message):
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("response", "❌ No 'response' key in reply.")
+        return data.get("response", "⚠️ No response key found.")
     except requests.exceptions.RequestException as e:
         return f"❌ Error: {str(e)}"

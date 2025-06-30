@@ -19,14 +19,16 @@ with st.container():
     for sender, msg in get_chat_history():
         if sender == "user":
             st.markdown(
-                f"""<div style='background-color: #c8f7c5; padding: 10px; border-radius: 10px;
-                      margin: 5px 0; max-width: 70%; margin-left: auto; text-align: right;'>{msg}</div>""",
+                f"""<div style='background-color: #2e7d32; color: white; padding: 10px; 
+                      border-radius: 10px; margin: 5px 0; max-width: 70%; 
+                      margin-left: auto; text-align: right;'>{msg}</div>""",
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                f"""<div style='background-color: #b3d9ff; padding: 10px; border-radius: 10px;
-                      margin: 5px 0; max-width: 70%; margin-right: auto; text-align: left;'>{msg}</div>""",
+                f"""<div style='background-color: #1565c0; color: white; padding: 10px; 
+                      border-radius: 10px; margin: 5px 0; max-width: 70%; 
+                      margin-right: auto; text-align: left;'>{msg}</div>""",
                 unsafe_allow_html=True
             )
 

@@ -10,6 +10,6 @@ def get_context(documents):
 def build_prompts_udf(documents, query) -> str:
     context = get_context(documents)
     prompt = (
-        f"Given the following documents : \n {context} \nanswer this query: {query}"
+        f"Given the following documents : \n {context} \nanswer this query: {query}. Respond only based on the context and query, donot use your knowledge."
     )
     return prompt
