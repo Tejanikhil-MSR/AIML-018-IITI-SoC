@@ -1,0 +1,6 @@
+Here is the output:
+
+```
+Empty Document
+No text found in the document.
+```

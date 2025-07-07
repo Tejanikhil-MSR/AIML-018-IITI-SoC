@@ -13,12 +13,10 @@ from pathway.xpacks.llm import llms
 
 load_dotenv()
 
-DATA_PATH = os.getenv("../data/")
-use_gpu = os.getenv("USE_GPU")
-if(use_gpu == "true"):
-    DEVICE = "gpu"
-else:
-    DEVICE = "cpu"
+DATA_PATH = "/home/saranshvashistha/workspace/AIML-018-IITI-SoC/data"
+
+DEVICE = "cpu"
+
 
 
 # Ingest documents

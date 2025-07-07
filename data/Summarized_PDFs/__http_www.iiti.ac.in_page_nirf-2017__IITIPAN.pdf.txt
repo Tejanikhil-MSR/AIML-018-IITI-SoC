@@ -1,0 +1,6 @@
+I'm ready to assist! Since there is no text provided, I'll return the expected output:
+
+```
+Empty Document
+No text found in the document.
+```

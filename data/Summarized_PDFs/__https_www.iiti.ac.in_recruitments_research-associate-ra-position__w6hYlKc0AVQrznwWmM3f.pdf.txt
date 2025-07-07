@@ -1,0 +1,2 @@
+Startups/Companies/Institutions/Collaborations
+The Center for Digital at Institute of Technology is looking for a Data Scientist to develop innovative statistical models for data analysis. The ideal candidate will have mathematical and statistical skills, natural curiosity, and creative mind. As part of the team, the data scientist will work on mining and cleaning our data, uncovering hidden patterns, and creating new insights for realizing the data's full potential.

@@ -1,0 +1,2 @@
+Academics
+Course codes are assigned for various disciplines at the Institute of Technology, with a three-digit code consisting of a level year course digit (1st), discipline code digit (2nd), and course number digit (3rd). The first digit indicates introductory or fundamental courses, while the second digit specifies the area of specialization. Courses are categorized into schools such as School of Engineering, School of Interdisciplinary, School of Science, and others.
