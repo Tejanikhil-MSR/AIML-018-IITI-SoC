@@ -34,3 +34,6 @@ checkpoints/
 *.pb
 
 mvp_pipeline.py
+Cache
+data/RAW_PDF_DOCS
+data/WebPDFOnlySummarized

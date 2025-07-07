@@ -1,0 +1,39 @@
+Here are the transformed paragraphs:
+
+**Development of Ti Ta Mo High Entropy Alloy**
+
+Researchers have successfully developed a new high-entropy alloy, Ti-Ta-Mo, using a plasma arc additive process. The alloy has been evaluated for its potential use in knee implants. The microstructure and viability of the alloy were assessed, with results showing excellent corrosion resistance and no pitting or degradation. The alloy's properties make it an ideal candidate for use in knee implants, potentially replacing current materials.
+
+**Edge Wave for Non-Destructive Testing**
+
+A study has been conducted on the use of edge waves for non-destructive testing technology. Researchers have used a semi-infinite foundation and imaginary functional grading to analyze the dynamic behavior of thin plates under bending. The results show that edge waves can be used to identify structural damage, making them an ideal candidate for non-destructive testing. This technology has potential applications in pavements, highways, and airports.
+
+**Estimator for Elliptic Flow**
+
+A novel method for estimating elliptic flow in heavy ion collisions has been developed using a deep neural network-based machine learning model. The model takes into account various inputs such as mass transverse momentum, collision energy, and centrality to estimate the elliptic flow. The results show that the model is robust against event noise and can accurately predict the elliptic flow. This work is one of the first in heavy ion collisions at the LHC.
+
+**Certitude of Being Black**
+
+This paper analyzes the entangled cultural experience associated with dislocation, redefinition of indigenous identity, and formation of hybrid identity through black consciousness. The study examines the novel "being black" as an active state of kinship. The results show that the certitude of being black is a complex process involving dislocation, redefinition, and hybridization.
+
+**Edge Wave Propagation**
+
+Researchers have studied the dynamic behavior of semi-infinite transversely isotropic thin plates under bending using a foundation and quadratic grading material. The study found that edge waves can be used to identify structural damage and has potential applications in pavements and highways.
+
+**Plasma Arc Additive Process**
+
+A plasma arc additive process was used to develop a new high-entropy alloy, Ti-Ta-Mo, for knee implants. The microstructure and viability of the alloy were evaluated, with results showing excellent corrosion resistance and no pitting or degradation.
+
+**Energy Storage Performance**
+
+Researchers have studied the morphology-driven enhancement of electrochemical energy storage performance for manganese titanate perovskite electrodes. The study found that morphological transformation can lead to ultra-thin stable electrodes with high specific capacitance, power, and energy density. This work has potential applications in environmentally friendly electrochemical devices.
+
+**Heavy Ion Collisions**
+
+Researchers have used a deep neural network-based machine learning model to estimate elliptic flow in heavy ion collisions at the LHC. The model takes into account various inputs such as mass transverse momentum, collision energy, and centrality to estimate the elliptic flow. The results show that the model is robust against event noise and can accurately predict the elliptic flow.
+
+**Non-Destructive Testing**
+
+Researchers have developed a novel method for non-destructive testing technology using edge waves. The study found that edge waves can be used to identify structural damage, making them an ideal candidate for non-destructive testing. This technology has potential applications in pavements, highways, and airports.
+
+Please note that some of the original text may not be included in the transformed paragraphs as it was either redundant or not relevant to the main topic.

@@ -1,0 +1,4 @@
+Here is the output:
+
+Academics
+The Institute of Technology is recruiting a Junior Research Fellow to work on the project "Based MIL Data Analyzer" under the RESPOND scheme. The successful candidate should have a degree in Computer Science and Engineering, Electronics and Communication Engineering or related engineering disciplines, GATE qualification in Computer Science or Electronics, and knowledge of communication protocols. Experience in front-end development and proficiency in Python are desirable. The fellowship offers a monthly stipend of Rs. 37,000 for a duration of three years, with the option to extend based on performance. Applications must be submitted through the online form link at by March 30, 2025, and selected candidates will be notified via email for an interview.

@@ -1,42 +1,42 @@
 import pathway as pw
 from pathway.xpacks.llm.vector_store import VectorStoreServer
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import CharacterTextSplitter,RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-# Read your text documents (streaming mode, with metadata)
+# === CONFIGURATION ===
+DATA_DIR = "/home/saranshvashistha/workspace/AIML-018-IITI-SoC/data/Summarized_PDFs"
+EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"  # Or use 'bge-large-en-v1.5' for higher accuracy (needs more RAM)
+CACHE_DIR = "./Cache"
+HOST = "127.0.0.1"
+PORT = 8666
+
+# === 1. Load data from filesystem in streaming mode (with metadata) ===
 data = pw.io.fs.read(
-    "/home/saranshvashistha/workspace/AIML-018-IITI-SoC/data/",
+    DATA_DIR,
     format="plaintext",
     mode="streaming",
     with_metadata=True,
 )
 
-# Use a HuggingFace model for embeddings 
-# embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/bge-large-en-v1.5")
-embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-en-v1.5")
-# Chunk the text using a character-based splitter
-# splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL,  model_kwargs = {'device': 'cpu'})
+
+#from langchain.text_splitter import MarkdownHeaderTextSplitter, NLTKTextSplitter
+
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200,
-    separators=[ ".", " ", ""],  # prefers splitting on paragraphs, then lines, etc.
+    chunk_size=800,
+    chunk_overlap=150,
+    separators=["\n\n", "\n", ".", " ", ""]  # Prioritize paragraph/sentence boundaries
 )
 
-# Set host and port for the webserver
-host = "127.0.0.1"
-port = 8666
-
-# Start the Pathway VectorStoreServer with your data, splitter, and embedder
 server = VectorStoreServer.from_langchain_components(
     data,
     embedder=embeddings,
     splitter=splitter,
 )
 
-# Run the server (with caching for efficiency)
 server.run_server(
-    host=host,
-    port=port,
+    host=HOST,
+    port=PORT,
     with_cache=True,
-    cache_backend=pw.persistence.Backend.filesystem("./Cache")
+    cache_backend=pw.persistence.Backend.filesystem(CACHE_DIR)
 )
