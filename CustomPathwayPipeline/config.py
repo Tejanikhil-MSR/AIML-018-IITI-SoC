@@ -1,7 +1,7 @@
 import os
 
 # --- Model Configuration ---
-MODEL_CHOICE = "phi3"
+MODEL_CHOICE = "tinyllama"
 
 MODEL_REGISTRY = {
     "tinyllama": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
