@@ -7,34 +7,39 @@ from langchain_core.messages import HumanMessage, AIMessage
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain_community.vectorstores import PathwayVectorClient
 import torch
+from datetime import datetime
 
-app = Flask(__name__)
-memory = ConversationBufferMemory(return_messages=True)
+DEFAULT_COLLEGE_WEBSITE_LINK = "https://www.iiti.ac.in/"
 
 # === Model Setup (Phi3, TinyLlama, etc.) ===
-MODEL_CHOICE = "mistral"
+MODEL_CHOICE = "tinyllama"
 MODEL_REGISTRY = {
     "tinyllama": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
     "mistral": "mistralai/Mistral-7B-Instruct-v0.1",
     "phi3": "microsoft/Phi-3-mini-4k-instruct"
 }
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
 model_name = MODEL_REGISTRY[MODEL_CHOICE]
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True).to(DEVICE)
+
+try:
+    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True).to("cuda")
+    DEVICE="cuda"
+except Exception as e:
+    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True).to("cpu")
+    DEVICE="cpu"
+    
 model.eval()
 
-generation_args = {
-    "max_new_tokens": 200,
-    "do_sample": True,
-    "temperature": 0.7,
-    "top_p": 0.9,
-    "repetition_penalty": 1.1,
-    "pad_token_id": tokenizer.eos_token_id,
-    "use_cache" : False
-}
+generation_args = {"max_new_tokens": 200,
+                   "do_sample": True,
+                   "temperature": 0.7,
+                   "top_p": 0.9,
+                   "repetition_penalty": 1.1,
+                   "pad_token_id": tokenizer.eos_token_id,
+                   "use_cache" : False}
 
-def local_llm(prompt) -> str:
+def generate_response(prompt) -> str:
     prompt_text = prompt.to_string() if hasattr(prompt, "to_string") else str(prompt)
     print(f" [prompt] = {prompt_text}")
     formatted_prompt = f"### Instruction:\n{prompt_text.strip()}\n\n### Response:\n"
@@ -46,41 +51,60 @@ def local_llm(prompt) -> str:
     decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return decoded.split("### Response:")[-1].strip()
 
-# === Prompt ===
-template = """
-You are a helpful assistant for college-related questions.
-Given the following context: 
-{context}
+app = Flask(__name__)
+memory = ConversationBufferMemory(return_messages=True)
 
-And the chat history so far:
-{chat_history}
-
-Now, answer the current query:
-{question}
-
-Only use the context and the chat history to answer. If you don't know the answer, say so politely.
-"""
-prompt = ChatPromptTemplate.from_template(template)
-
-# === Vector Store ===
+# === Connect to Pathway server ===
 client = PathwayVectorClient(host="127.0.0.1", port=8666)
 retriever = client.as_retriever()
 
-def format_docs(docs):
-    print("Retrieved:", docs[0].page_content if docs else "")
-    return docs[0].page_content if docs else ""
+# === Prompt ===
 
-formatted_retriever = retriever | RunnableLambda(format_docs)
+PromptTemplate = """
+You are a AI bot responding to the user for the question - {question} given the context {context} with the previous conversations {chat_history}.
+
+**Additional Info**
+- Current Date : {current_date}
+
+**Important Note** : 
+- Only use the context and the chat history to answer. If you don't know the answer, say so politely.
+- Ask the user to check the College website for more information {reference_links} if you feel that the context is time sensitive.
+- Only specify the time/date if the venue/date specified in the context is near to the current date, else ask them to check the website.
+"""
+AugmentPrompt = ChatPromptTemplate.from_template(PromptTemplate)
+
+
+def format_docs(docs) -> dict:
+    print("\n==== Retrieved Context ====\n")
+    formatted_context = []
+    ReferenceLinks = []
+    for i, doc in enumerate(docs[0:3]):
+        print(f"--- Document Chunk {i+1} ---")
+        print(f"Content: {doc.page_content}")
+        # Now we can print the custom metadata!
+        print(f"File Name: {doc.metadata.get('file_name', 'N/A')}")
+        print("-" * 30)
+        formatted_context.append(doc.page_content)
+        ReferenceLinks.append(doc.metadata.get('file_name', DEFAULT_COLLEGE_WEBSITE_LINK))
+        
+    return {
+            "context": "\n\n".join(formatted_context),
+            "reference_links": "\n".join(ReferenceLinks), 
+    }
+    
+ExtractedContext = retriever | RunnableLambda(format_docs)
 
 def get_chain():
     return (
         {
-            "context": formatted_retriever,
+            "context": ExtractedContext["context"],
             "question": RunnablePassthrough(),
+            "reference_links": ExtractedContext["reference_links"],
+            "current_date": datetime.now().strftime("%d/%m/%Y"),
             "chat_history": lambda _: memory.chat_memory.messages
         }
-        | prompt
-        | RunnableLambda(local_llm)
+        | AugmentPrompt
+        | RunnableLambda(generate_response)
         | StrOutputParser()
     )
 

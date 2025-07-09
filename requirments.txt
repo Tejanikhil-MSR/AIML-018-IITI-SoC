@@ -1,2 +1,7 @@
+# Pathway - A real time straming tool
 pathway[xpack-llm]
-python-dotenv
+pathway[xpack-llm-docs]
+
+python-dotenv # for env
+
+flask # for app

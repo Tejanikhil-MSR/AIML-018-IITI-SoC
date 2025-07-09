@@ -1,0 +1,57 @@
+/home/tejanikhil/Desktop/GitRepositories/AIML-018-IITI-SoC/PathwayServerExpose.py:33: LangChainDeprecationWarning: The class `HuggingFaceEmbeddings` was deprecated in LangChain 0.2.2 and will be removed in 1.0. An updated version of the class exists in the langchain-huggingface package and should be used instead. To use it run `pip install -U langchain-huggingface` and import as `from langchain_huggingface import HuggingFaceEmbeddings`.
+  embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL,  model_kwargs = {'device': 'cpu'})
+/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/xpacks/llm/document_store.py:259: UserWarning: `_metadata` column is not present in Table <pathway.Table schema={'data': <class 'str'>, 'file_name': typing.Any, 'chunks': typing.Any}>. Filtering will not work for this Table
+  warnings.warn(
+/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/beartype/_util/hint/pep/utilpeptest.py:311: BeartypeDecorHintPep585DeprecationWarning: PEP 484 type hint typing.Sequence[str] deprecated by PEP 585. This hint is scheduled for removal in the first Python version released after October 5th, 2025. To resolve this, import this hint from "beartype.typing" rather than "typing". For further commentary and alternatives, see also:
+    https://beartype.readthedocs.io/en/latest/api_roar/#pep-585-deprecations
+  warn(
+[2025-07-08T04:41:27]:INFO:Preparing Pathway computation
+[2025-07-08T04:41:27]:ERROR:Wrong format of persistent entry key: 0-0
+[2025-07-08T04:41:27]:ERROR:Wrong format of persistent entry key: 0-1
+[2025-07-08T04:41:27]:INFO:Worker 0 is on the version 1. The latest stable metadata version is None
+[2025-07-08T04:41:27]:INFO:Enter read_snapshot method with reader PosixLike
+[2025-07-08T04:41:27]:INFO:Enter read_snapshot method with reader Python
+[2025-07-08T04:41:27]:INFO:Enter read_snapshot method with reader Python
+[2025-07-08T04:41:27]:INFO:Enter read_snapshot method with reader Python
+[2025-07-08T04:41:27]:INFO:FileSystem(./Data/CleanedPDFsSummarized): 0 entries (1 minibatch(es)) have been sent to the engine
+[2025-07-08T04:41:27]:INFO:PythonReader: 0 entries (1 minibatch(es)) have been sent to the engine
+[2025-07-08T04:41:27]:INFO:PythonReader: 0 entries (1 minibatch(es)) have been sent to the engine
+[2025-07-08T04:41:27]:INFO:PythonReader: 0 entries (1 minibatch(es)) have been sent to the engine
+[2025-07-08T04:41:27]:INFO:subscribe-0: Done writing 0 entries, time 1751929887718. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+[2025-07-08T04:41:27]:INFO:subscribe-0: Done writing 0 entries, time 1751929887718. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+[2025-07-08T04:41:27]:INFO:subscribe-0: Done writing 0 entries, time 1751929887718. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+======== Running on http://127.0.0.1:8666 ========
+(Press CTRL+C to quit)
+Traceback (most recent call last):
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/graph_runner/__init__.py", line 204, in _run
+    return api.run_with_new_graph(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/tejanikhil/Desktop/GitRepositories/AIML-018-IITI-SoC/PathwayServerExpose.py", line 80, in <module>
+    server.run_server(
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/xpacks/llm/vector_store.py", line 168, in run_server
+    run()
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/xpacks/llm/vector_store.py", line 157, in run
+    pw.run(
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/runtime_type_check.py", line 19, in with_type_validation
+    return beartype.beartype(f)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<@beartype(pathway.internals.run.run) at 0x7f6c6cdb0720>", line 143, in run
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/run.py", line 55, in run
+    ).run_outputs()
+      ^^^^^^^^^^^^^
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/graph_runner/__init__.py", line 119, in run_outputs
+    self.run_nodes(self._graph.global_scope.output_nodes, after_build=after_build)
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/graph_runner/__init__.py", line 95, in run_nodes
+    self._run(all_nodes, after_build=after_build)
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/graph_runner/__init__.py", line 238, in _run
+    for node in graph.G._current_scope.nodes:
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tejanikhil/miniconda3/envs/iiti-bot/lib/python3.12/site-packages/pathway/internals/parse_graph.py", line 119, in _current_scope
+    @property
+
+KeyboardInterrupt
