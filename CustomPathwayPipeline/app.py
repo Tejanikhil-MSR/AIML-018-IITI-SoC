@@ -2,28 +2,27 @@ from flask import Flask, request, jsonify, session
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import HumanMessage, AIMessage
 import uuid
-import asyncio # Still needed for create_future
+import asyncio
+import random
 
-# Import components from our new modules
 from config import FLASK_HOST, FLASK_PORT, FLASK_SECRET_KEY, MODEL_CHOICE
+from config import GREETING_LABELS, SEND_OFF_LABELS, GREETING_RESPONSES, CONVERSATIONAL_RESPONSES
 from rag_chain_builder import rag_builder
-from batch_processor import batch_processor # We'll modify this to manage shared memory better
+from batch_processor import batch_processor
 from query_classifier import query_classifier
 
 app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
 
-# Helper function to get/create user-specific memory
 def get_user_memory() -> ConversationBufferMemory:
     """
-    Retrieves or creates a ConversationBufferMemory for the current session.
-    The actual messages are stored in the Flask session.
+        Retrieves or creates a ConversationBufferMemory for the current session.
+        The actual messages are stored in the Flask session.
     """
-    # session.permanent = True # Optional: Make session last longer than browser close
+    # session.permanent = True # Optional
     if 'chat_messages' not in session:
         session['chat_messages'] = []
     
-    # Reconstruct ConversationBufferMemory from session messages
     memory = ConversationBufferMemory(return_messages=True)
     for msg_data in session['chat_messages']:
         if msg_data['type'] == 'human':
@@ -32,15 +31,32 @@ def get_user_memory() -> ConversationBufferMemory:
             memory.chat_memory.add_message(AIMessage(content=msg_data['content']))
     return memory
 
-# Helper function to save user-specific memory
 def save_user_memory_to_session(memory_messages: list):
     """
-    Saves the provided serializable list of messages to the Flask session.
+        Saves the provided serializable list of messages to the Flask session.
     """
     session['chat_messages'] = memory_messages
 
+def handle_direct_response(user_query: str, user_memory: ConversationBufferMemory) -> str:
+    """
+    Generates a direct response for conversational/greeting queries.
+    This can be a simple rule-based response or a lighter LLM call.
+    """
+    
+    query_lower = user_query.lower()
+    if any(keyword in query_lower for keyword in GREETING_LABELS):
+        response = random.choice(GREETING_RESPONSES)
+    elif any(keyword in query_lower for keyword in SEND_OFF_LABELS):
+        response = random.choice(CONVERSATIONAL_RESPONSES)
+    else:
+        response = "Hello! How can I assist you today?"
+    
+    # Update the memory directly here since it's an immediate response
+    user_memory.chat_memory.add_message(AIMessage(content=response))
+    save_user_memory_to_session(user_memory.chat_memory.messages) # Save immediately
+    
+    return response
 
-# --- Flask Routes ---
 
 @app.route("/", methods=["POST"])
 def chat():
@@ -51,17 +67,15 @@ def chat():
     if not user_message:
         return jsonify({"error": "Missing 'messages' field"}), 400
     
-    user_memory = get_user_memory() # Get memory based on current session
+    # Get memory based on current session
+    user_memory = get_user_memory()
     
     if selected_label:
-        # Phase 2: User has selected a label, proceed with RAG
+
         original_message = session.pop('original_user_message', user_message)
         
-        # Add the original user message to memory
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
-        # No need to save_user_memory_to_session here directly,
-        # it will be saved after the LLM response is ready.
-
+        
         formatted_prompt = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
         
         request_id = str(uuid.uuid4())
@@ -72,9 +86,6 @@ def chat():
             asyncio.set_event_loop(loop)
         future = loop.create_future()
         
-        # Pass the current chat_messages and session_id to batch_processor
-        # The batch_processor will handle updating the memory and returning
-        # the *full updated serializable messages* in the future's result.
         batch_processor.add_request_to_queue({
             'request_id': request_id,
             'formatted_prompt': formatted_prompt,
@@ -89,16 +100,17 @@ def chat():
         probable_labels = query_classifier.classify_query(user_message)
         
         if not probable_labels:
-            probable_labels = ["General Info"] # Default if no specific labels found
+            # Default if no specific labels found
+            probable_labels = ["General Info"]
             
-        session['original_user_message'] = user_message # Store for next step
+        session['original_user_message'] = user_message
 
         return jsonify({
-            "status": "label_selection_needed",
-            "message": "Please select the most relevant category for your query:",
-            "query": user_message,
-            "probable_labels": probable_labels
-        }), 200
+                        "status": "label_selection_needed",
+                        "message": "Please select the most relevant category for your query:",
+                        "query": user_message,
+                        "probable_labels": probable_labels
+                       }), 200
 
 @app.route("/status/<request_id>", methods=["GET"])
 def get_status(request_id):
@@ -109,14 +121,13 @@ def get_status(request_id):
         updated_messages = result_data.get('updated_chat_messages')
 
         if updated_messages is not None:
-            # Save the updated chat messages back to the Flask session
             save_user_memory_to_session(updated_messages)
             print(f" [App] Saved updated memory for session.")
 
         return jsonify({"status": status, "response": response}), 200
     elif status == "error":
         return jsonify({"status": status, "message": result_data}), 500
-    else: # processing or not_found
+    else:
         return jsonify({"status": status, "message": result_data if result_data else "Processing..."}), 200
 
 

@@ -1,7 +1,6 @@
-# model_loader.py
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
-from config import MODEL_CHOICE, MODEL_REGISTRY, DEVICE, GENERATION_ARGS # Import initial DEVICE from config
+from config import MODEL_CHOICE, MODEL_REGISTRY, DEVICE, GENERATION_ARGS
 
 class LLMModelLoader:
     """
@@ -9,7 +8,6 @@ class LLMModelLoader:
     """
     def __init__(self):
         self.model_name = MODEL_REGISTRY[MODEL_CHOICE]
-        # Store device as an instance attribute
         self.current_device = DEVICE 
         self.tokenizer = self._load_tokenizer()
         self.model = self._load_model()
@@ -19,8 +17,8 @@ class LLMModelLoader:
     def _load_tokenizer(self):
         tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
-        tokenizer.padding_side = "left" # Crucial for batched inference
-        tokenizer.truncation_side = "left" # Crucial for batched inference
+        tokenizer.padding_side = "left" 
+        tokenizer.truncation_side = "left"
         return tokenizer
 
     def _load_model(self):
@@ -30,7 +28,6 @@ class LLMModelLoader:
         except Exception as e:
             print(f"CUDA not available or error loading to GPU: {e}. Falling back to CPU.")
             model = AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code=True).to("cpu")
-            # Update the instance attribute, not the global variable
             self.current_device = "cpu"
             
         model.config.pad_token_id = model.config.eos_token_id
@@ -42,7 +39,6 @@ class LLMModelLoader:
         Generates responses for a batch of prompts using the loaded LLM.
         """
         print(f" [Batch] Processing batch of {len(prompts)} prompts...")
-        # Use the instance's current_device for operations
         inputs = self.tokenizer(prompts, padding=True, truncation=True, return_tensors="pt").to(self.current_device)
 
         with torch.no_grad():
@@ -57,5 +53,4 @@ class LLMModelLoader:
         print(f" [Batch] Finished processing batch.")
         return decoded_responses
 
-# Instantiate the model loader
 llm_model_loader = LLMModelLoader()

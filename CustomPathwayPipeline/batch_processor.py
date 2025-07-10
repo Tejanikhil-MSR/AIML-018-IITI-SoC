@@ -7,14 +7,8 @@ from langchain.memory import ConversationBufferMemory
 from config import MAX_BATCH_SIZE, BATCH_TIMEOUT_SECONDS
 from loader import llm_model_loader
 
-# Global queue and futures for batching
 request_queue = queue.Queue()
 response_futures = {}  # id -> asyncio.Future
-
-# No need for a global `session_memories` dict here anymore,
-# as memory reconstruction is per-request in the batch thread.
-# session_memories = {} # REMOVE THIS LINE
-# session_memories_lock = threading.Lock() # REMOVE THIS LINE
 
 class BatchProcessor:
     """
@@ -30,9 +24,6 @@ class BatchProcessor:
         self.batch_thread = threading.Thread(target=self._processing_loop, daemon=True)
         self.batch_thread.start()
         print("Batch processing thread started.")
-
-    # Remove the register_session_memory and get_serializable_messages methods.
-    # The memory will be reconstructed per batch item.
 
     def _processing_loop(self):
         while True:
@@ -56,7 +47,7 @@ class BatchProcessor:
                 continue
             
             prompts_to_process = []
-            request_data_for_future = [] # Store all data needed to set future result
+            request_data_for_future = []
 
             for item in batch:
                 prompts_to_process.append(item['formatted_prompt'])
@@ -73,25 +64,22 @@ class BatchProcessor:
 
                 request_data_for_future.append({
                     'request_id': item['request_id'],
-                    'user_memory_instance': current_memory, # Store the actual instance
-                    'initial_user_message': item['user_message'] # Keep track of message
+                    'user_memory_instance': current_memory, 
+                    'initial_user_message': item['user_message']
                 })
             
             # --- Perform actual LLM generation ---
             try:
                 batch_responses = self.llm_model_loader.generate_batched_responses(prompts_to_process)
                 
-                # --- Distribute responses and update memory ---
                 for i, response_text in enumerate(batch_responses):
                     req_data = request_data_for_future[i]
                     req_id = req_data['request_id']
                     user_memory_instance = req_data['user_memory_instance']
 
-                    # Add the AI response to the memory
                     user_memory_instance.chat_memory.add_message(AIMessage(content=response_text))
                     print(f" [Batch] Updated memory for request_id: {req_id}")
 
-                    # Serialize the *updated* memory messages to send back to Flask
                     serializable_messages = []
                     for msg in user_memory_instance.chat_memory.messages:
                         if isinstance(msg, HumanMessage):
@@ -99,7 +87,6 @@ class BatchProcessor:
                         elif isinstance(msg, AIMessage):
                             serializable_messages.append({'type': 'ai', 'content': msg.content})
 
-                    # Set the result on the future with the response and updated messages
                     if req_id in response_futures:
                         response_futures[req_id].set_result({
                             'response': response_text,
@@ -114,7 +101,7 @@ class BatchProcessor:
                 for i, req_data in enumerate(request_data_for_future):
                     req_id = req_data['request_id']
                     if req_id in response_futures:
-                        response_futures[req_id].set_exception(str(e)) # Set error message directly
+                        response_futures[req_id].set_exception(str(e))
 
 
     def add_request_to_queue(self, request_data: dict, future: asyncio.Future):
@@ -146,5 +133,4 @@ class BatchProcessor:
             return "processing", None
 
 
-# Instantiate the batch processor
 batch_processor = BatchProcessor()

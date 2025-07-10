@@ -35,5 +35,4 @@ class PathwayRetriever:
         """
         return self.extracted_context_chain.invoke(query)
 
-# Instantiate the Pathway retriever
 pathway_retriever = PathwayRetriever()
