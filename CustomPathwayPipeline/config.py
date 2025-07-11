@@ -1,7 +1,7 @@
 import os
 
 # --- Model Configuration ---
-MODEL_CHOICE = "tinyllama"
+MODEL_CHOICE = "mistral"
 
 MODEL_REGISTRY = {
     "tinyllama": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
@@ -50,7 +50,7 @@ GREETING_RESPONSES = ["Hello! How can I assist you today regarding IIT Indore?",
                       "Greetings! I'm here to help with your IIT Indore questions.", "Hey! Ask me anything about IIT Indore.", 
                       "Welcome! How can I guide you about the campus?"]
     
-conversational_responses = ["You're welcome! Feel free to ask if you have more questions.", "My pleasure! I'm an AI assistant for IIT Indore. How can I help?",
+CONVERSATIONAL_RESPONSES = ["You're welcome! Feel free to ask if you have more questions.", "My pleasure! I'm an AI assistant for IIT Indore. How can I help?",
                             "I'm here to provide information about IIT Indore. What's on your mind?", 
                             "It was nice chatting with you! Is there anything else about IIT Indore I can assist with?"]
 
@@ -58,13 +58,16 @@ INTENTS = ["Admissions", "Academics", "Student Life", "Research", "Events"]
 
 # --- RAG Prompt Template ---
 PROMPT_TEMPLATE = """
+[INST] 
 You are a AI bot responding to the user for the question - {question} given the context {context} with the previous conversations {chat_history}.
 
 **Additional Info**
 - Current Date : {current_date}
-
+<<SYS>>
 **Important Note** : 
 - Only use the context and the chat history to answer. If you don't know the answer, say so politely.
 - Ask the user to check the College website for more information {reference_links} if you feel that the context is time sensitive.
 - Only specify the time/date if the venue/date specified in the context is near to the current date, else ask them to check the website.
+<</SYS>>
+[/INST]
 """

@@ -77,13 +77,14 @@ def chat():
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
         formatted_prompt = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
-        
+
         request_id = str(uuid.uuid4())
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            
         future = loop.create_future()
         
         batch_processor.add_request_to_queue({

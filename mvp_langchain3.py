@@ -33,7 +33,7 @@ model.eval()
 
 generation_args = {"max_new_tokens": 200,
                    "do_sample": True,
-                   "temperature": 0.7,
+                   "temperature": 0.8,
                    "top_p": 0.9,
                    "repetition_penalty": 1.1,
                    "pad_token_id": tokenizer.eos_token_id,
@@ -97,16 +97,23 @@ ExtractedContext = retriever | RunnableLambda(format_docs)
 def get_chain():
     return (
         {
-            "context": ExtractedContext["context"],
+            "retrieved": ExtractedContext,
             "question": RunnablePassthrough(),
-            "reference_links": ExtractedContext["reference_links"],
-            "current_date": datetime.now().strftime("%d/%m/%Y"),
-            "chat_history": lambda _: memory.chat_memory.messages
+            "current_date": lambda _: datetime.now().strftime("%d/%m/%Y"),
+            "chat_history": lambda _: memory.chat_memory.messages,
         }
+        | RunnableLambda(lambda inputs: {
+            "context": inputs["retrieved"]["context"],
+            "reference_links": inputs["retrieved"]["reference_links"],
+            "question": inputs["question"],
+            "current_date": inputs["current_date"],
+            "chat_history": inputs["chat_history"],
+        })
         | AugmentPrompt
         | RunnableLambda(generate_response)
         | StrOutputParser()
     )
+
 
 @app.route("/", methods=["POST"])
 def chat():
