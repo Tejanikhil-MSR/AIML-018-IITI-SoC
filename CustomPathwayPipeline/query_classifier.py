@@ -1,4 +1,3 @@
-from config import DIRECT_RESPONSE_LABELS
 from config import INTENTS
 
 class QueryClassifier:

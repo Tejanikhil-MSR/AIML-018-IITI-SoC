@@ -5,11 +5,14 @@ import uuid
 import asyncio
 import random
 
-from config import FLASK_HOST, FLASK_PORT, FLASK_SECRET_KEY, MODEL_CHOICE
+from config import FLASK_HOST, FLASK_PORT, FLASK_SECRET_KEY, MODEL_CHOICE, INFO_LOGGING
 from config import GREETING_LABELS, SEND_OFF_LABELS, GREETING_RESPONSES, CONVERSATIONAL_RESPONSES
 from rag_chain_builder import rag_builder
 from batch_processor import batch_processor
 from query_classifier import query_classifier
+
+import logging
+logging.basicConfig(filename=INFO_LOGGING, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
@@ -76,7 +79,8 @@ def chat():
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
-        formatted_prompt = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        formatted_prompt, reference_links = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        logging.info("Files retrieved : ", reference_links)
         
         request_id = str(uuid.uuid4())
         try:

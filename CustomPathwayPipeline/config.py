@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 # --- Model Configuration ---
 MODEL_CHOICE = "tinyllama"
@@ -25,8 +26,14 @@ GENERATION_ARGS = {
 PATHWAY_HOST = "127.0.0.1"
 PATHWAY_PORT = 8101
 DEFAULT_REF_LINK = "www.iiti.ac.in" # Default reference link if metadata is missing
-SERVER_LOGGING_DIR = "./logs/pathway_server.log"
-DATA_DIR = "../Data/TrialSamples/"
+
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+Logdir = "./logs"
+os.mkdir(f"{Logdir}/{timestamp}")
+DEBUGGER_LOGGING = f"./logs/{timestamp}/pathway_server_debug.log"
+INFO_LOGGING = f"./logs/{timestamp}/info.log"
+
+DATA_DIR = "../Documentations/"
 EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"  # Or use 'bge-large-en-v1.5' for higher accuracy (needs more RAM)
 CACHE_DIR = "./Cache"
 
@@ -50,7 +57,7 @@ GREETING_RESPONSES = ["Hello! How can I assist you today regarding IIT Indore?",
                       "Greetings! I'm here to help with your IIT Indore questions.", "Hey! Ask me anything about IIT Indore.", 
                       "Welcome! How can I guide you about the campus?"]
     
-conversational_responses = ["You're welcome! Feel free to ask if you have more questions.", "My pleasure! I'm an AI assistant for IIT Indore. How can I help?",
+CONVERSATIONAL_RESPONSES = ["You're welcome! Feel free to ask if you have more questions.", "My pleasure! I'm an AI assistant for IIT Indore. How can I help?",
                             "I'm here to provide information about IIT Indore. What's on your mind?", 
                             "It was nice chatting with you! Is there anything else about IIT Indore I can assist with?"]
 

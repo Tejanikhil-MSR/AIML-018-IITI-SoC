@@ -1,7 +1,8 @@
 # Pathway - A real time straming tool
 pathway[xpack-llm]
 pathway[xpack-llm-docs]
-
+sentence-transformers
 python-dotenv # for env
 
 flask # for app
+

@@ -1,41 +1,88 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 import streamlit as st
-from components.layout import render_header, render_styles
-from components.chatbot import get_bot_response
-from components.session import init_chat_history, add_message, get_chat_history
 
-# Setup
-st.set_page_config(page_title="College Chatbot", layout="centered")
-render_styles()
-render_header()
-init_chat_history()
+# Set wide layout for desktop feel
+st.set_page_config(
+    page_title="Web Interface",
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
-# Display chat messages inside a container
-with st.container():
-    st.markdown("### 💬 Chat History")
-    for sender, msg in get_chat_history():
-        if sender == "user":
-            st.markdown(
-                f"""<div style='background-color: #2e7d32; color: white; padding: 10px; 
-                      border-radius: 10px; margin: 5px 0; max-width: 70%; 
-                      margin-left: auto; text-align: right;'>{msg}</div>""",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                f"""<div style='background-color: #1565c0; color: white; padding: 10px; 
-                      border-radius: 10px; margin: 5px 0; max-width: 70%; 
-                      margin-right: auto; text-align: left;'>{msg}</div>""",
-                unsafe_allow_html=True
-            )
+# Inject custom CSS (theme based on Android dark UI)
+st.markdown("""
+    <style>
+    /* Set background and text color */
+    body {
+        background-color: #121212;
+        color: #FFFFFF;
+    }
 
-# Input field and send button
-user_input = st.text_input("Type your message here:")
-if st.button("Send") and user_input.strip():
-    add_message("user", user_input.strip())
-    bot_reply = get_bot_response(user_input.strip())
-    add_message("bot", bot_reply)
-    st.rerun()
+    /* Style all text elements */
+    h1, h2, h3, h4, h5, h6, p {
+        color: #FFFFFF;
+    }
+
+    /* Customize buttons */
+    .stButton>button {
+        background-color: #1E88E5;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 24px;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .stButton>button:hover {
+        background-color: #1565C0;
+        transition: 0.3s;
+    }
+
+    /* Customize text inputs */
+    .stTextInput>div>input {
+        background-color: #1E1E1E;
+        color: white;
+        border-radius: 5px;
+        border: 1px solid #333;
+        padding: 8px;
+    }
+
+    /* Center image/logo if needed */
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    /* Adjust columns padding */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- Interface Starts Here ---
+st.markdown("<div class='logo-container'><h2>🌐 Web Interface</h2></div>", unsafe_allow_html=True)
+
+# Two-column layout
+col1, col2 = st.columns([1, 3])  # Adjust ratio for sidebar/main content
+
+# Left Sidebar / Info Section
+with col1:
+    st.subheader("Navigation")
+    st.button("Home")
+    st.button("Settings")
+    st.button("Help")
+    st.write("This sidebar mimics a native app drawer.")
+
+# Main Content
+with col2:
+    st.subheader("Main Interaction Area")
+
+    user_input = st.text_input("Enter your message")
+    if st.button("Submit"):
+        st.success(f"You entered: {user_input}")
+
+    st.markdown("---")
+    st.write("Here you can add charts, tables, or any Streamlit component to mimic Android behavior on a wide web interface.")
+

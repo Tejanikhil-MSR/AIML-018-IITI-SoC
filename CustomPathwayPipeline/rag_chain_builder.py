@@ -43,6 +43,6 @@ class RAGChainBuilder:
         
         prompt_value = self.augment_prompt.invoke(temp_chain_data)
         
-        return prompt_value.to_string()
+        return prompt_value.to_string(), docs_result["reference_links"]
 
 rag_builder = RAGChainBuilder()
