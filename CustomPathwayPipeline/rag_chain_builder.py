@@ -40,6 +40,8 @@ class RAGChainBuilder:
             "current_date": datetime.now().strftime("%d/%m/%Y"),
             "chat_history": user_memory.chat_memory.messages
         }
+
+        print(docs_result["reference_links"])
         
         prompt_value = self.augment_prompt.invoke(temp_chain_data)
         

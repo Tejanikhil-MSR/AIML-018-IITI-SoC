@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 # --- Model Configuration ---
-MODEL_CHOICE = "tinyllama"
+MODEL_CHOICE = "mistral"
 
 MODEL_REGISTRY = {
     "tinyllama": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
@@ -65,13 +65,16 @@ INTENTS = ["Admissions", "Academics", "Student Life", "Research", "Events"]
 
 # --- RAG Prompt Template ---
 PROMPT_TEMPLATE = """
+[INST] 
 You are a AI bot responding to the user for the question - {question} given the context {context} with the previous conversations {chat_history}.
 
 **Additional Info**
 - Current Date : {current_date}
-
+<<SYS>>
 **Important Note** : 
 - Only use the context and the chat history to answer. If you don't know the answer, say so politely.
 - Ask the user to check the College website for more information {reference_links} if you feel that the context is time sensitive.
 - Only specify the time/date if the venue/date specified in the context is near to the current date, else ask them to check the website.
+<</SYS>>
+[/INST]
 """

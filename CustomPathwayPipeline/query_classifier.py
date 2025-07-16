@@ -17,16 +17,6 @@ class QueryClassifier:
         
         probable_labels = []
         
-        # is_conversational = False
-        # for keyword in DIRECT_RESPONSE_LABELS:
-        #     if keyword in query_lower:
-        #         if len(query_lower.split()) <= 5 or query_lower.strip() == keyword: 
-        #             probable_labels.append("Conversational/Greeting")
-        #             is_conversational = True
-        #             break
-
-        # if is_conversational and len(probable_labels) == 1:
-        #     return ["Conversational/Greeting"] 
 
         if "admission" in query_lower or "apply" in query_lower or "entrance" in query_lower or "eligibility" in query_lower:
             probable_labels.append("Admissions")
