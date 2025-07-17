@@ -65,7 +65,8 @@ class BatchProcessor:
                 request_data_for_future.append({
                     'request_id': item['request_id'],
                     'user_memory_instance': current_memory, 
-                    'initial_user_message': item['user_message']
+                    'initial_user_message': item['user_message'],
+                    'keywords': item["keywords"]
                 })
             
             # --- Perform actual LLM generation ---
@@ -77,7 +78,7 @@ class BatchProcessor:
                     req_id = req_data['request_id']
                     user_memory_instance = req_data['user_memory_instance']
 
-                    user_memory_instance.chat_memory.add_message(AIMessage(content=response_text))
+                    user_memory_instance.chat_memory.add_message(AIMessage(content=req_data["keywords"]))
                     print(f" [Batch] Updated memory for request_id: {req_id}")
 
                     serializable_messages = []

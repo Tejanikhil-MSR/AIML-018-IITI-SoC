@@ -11,6 +11,7 @@ from config import ROOT_DATA_DIR, EMBEDDING_MODEL, CACHE_DIR, PATHWAY_HOST, PATH
 from PDFSummarizer import PDFSummarizer
 from config import ROOT_DATA_DIR, MODEL_CHOICE
 from langchain_community.chat_models import ChatOllama
+from keyword_extractor import extract_keywords_from_string
 
 import logging
 logging.basicConfig(filename=DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -58,9 +59,10 @@ pw.run()
 
 # After this the data_with_custom_metadata has (data: str, file_name: str, _metadata: pw.json("path":, "created_at":, "modified_at":, "seen_at": ,"size": ))
 @pw.udf
-def augment_metadata(metadata: pw.Json) -> dict:
+def augment_metadata(text, metadata: pw.Json) -> dict:
     metadata = metadata.as_dict()
     metadata["filename"] = metadata["path"].split("/")[-1]
+    metadata["keywords"] = "<keyword>".join(extract_keywords_from_string(text, 10))
     del metadata["path"]
     return metadata
 

@@ -27,11 +27,13 @@ def get_user_memory() -> ConversationBufferMemory:
         session['chat_messages'] = []
     
     memory = ConversationBufferMemory(return_messages=True)
+    
     for msg_data in session['chat_messages']:
         if msg_data['type'] == 'human':
             memory.chat_memory.add_message(HumanMessage(content=msg_data['content']))
         elif msg_data['type'] == 'ai':
             memory.chat_memory.add_message(AIMessage(content=msg_data['content']))
+            
     return memory
 
 def save_user_memory_to_session(memory_messages: list):
@@ -79,7 +81,8 @@ def chat():
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
-        formatted_prompt, reference_links = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        
         logging.info("Files retrieved : ", reference_links)
         
         request_id = str(uuid.uuid4())
@@ -95,7 +98,9 @@ def chat():
             'request_id': request_id,
             'formatted_prompt': formatted_prompt,
             'initial_chat_messages': session['chat_messages'], # Pass current messages
-            'user_message': original_message
+            'user_message': original_message,
+            'keywords': keywords
+            
         }, future)
         
         return jsonify({"request_id": request_id, "status": "processing_with_label", "label": selected_label}), 202

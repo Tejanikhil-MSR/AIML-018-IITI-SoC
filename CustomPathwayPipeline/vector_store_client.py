@@ -18,15 +18,19 @@ class PathwayRetriever:
         """
         formatted_context = []
         reference_links = []
+        keywords = []
         # Limiting to top 3 documents as per your original logic
         for doc in docs[0:3]:
             formatted_context.append(doc.page_content)
             # Accessing 'filename' from metadata as per your Pathway server setup
             reference_links.append(doc.metadata.get("filename", DEFAULT_REF_LINK))
-            
+            keywords.append(doc.metadata.get("keywords", " "))
+               
         return {
             "context": "\n\n".join(formatted_context),
-            "reference_links": "\n".join(reference_links), 
+            "reference_links": "\n".join(reference_links),
+            "keywords": "<doc>".join(keywords),
+            
         }
 
     def get_context_and_links(self, query: str) -> dict:

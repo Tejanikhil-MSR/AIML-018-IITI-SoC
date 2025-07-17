@@ -18,3 +18,8 @@ sentence-transformers
 
 # For API
 flask
+
+# For keyword extraction
+nltk
+keybert
+regex
