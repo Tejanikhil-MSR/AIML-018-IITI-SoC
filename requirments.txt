@@ -4,6 +4,8 @@
 
 # install unstructured libraries for pdf data extraction
 unstructured[all-docs]
+langchain
+langchain-community
 
 # install tesseract-ocr engine on your local system using `sudo apt install tesseract-ocr`
 # Ensure that tesseract is being detected by your environment

@@ -16,9 +16,6 @@ class PDFSummarizer:
         self.model = model
         self.output_dir = output_dir
 
-        # Ensure output directory exists
-        os.makedirs(self.output_dir, exist_ok=True)
-
         # Prepare summarization prompt
         summarize_prompt_template = """
         You are an AI assistant tasked with summarizing content.
@@ -61,30 +58,40 @@ class PDFSummarizer:
         all_summaries = []
 
         for chunk in texts:
+            
             try:
                 summary = self.summarize_chain.invoke({"element": chunk.text})
                 all_summaries.append(summary)
+                
             except Exception as e:
                 all_summaries.append(chunk.text[:200])
 
         for chunk in tables:
             table_content = getattr(chunk.metadata, "text_as_html", chunk.text)
+            
             try:
                 summary = self.summarize_chain.invoke({"element": table_content})
                 all_summaries.append(summary)
+                
             except Exception as e:
                 all_summaries.append(table_content[:200])
 
         if all_summaries:
             combined_summary_input = "\n\n".join(all_summaries)
+            
             try:
                 final_summary = self.summarize_chain.invoke({"element": combined_summary_input})
+                
             except Exception as e:
                 final_summary = combined_summary_input
+                
         else:
             final_summary = "No content found in PDF."
 
         if save_as:
+            # Ensure output directory exists
+            os.makedirs(self.output_dir, exist_ok=True)
+            
             with open(output_file_path, "w", encoding="utf-8") as f:
                 f.write(f"--- Summary for {pdf_filename} ---\n\n")
                 f.write(final_summary)
@@ -92,3 +99,4 @@ class PDFSummarizer:
             print(f"✅ Summary written to: {output_file_path}")
 
         return final_summary
+

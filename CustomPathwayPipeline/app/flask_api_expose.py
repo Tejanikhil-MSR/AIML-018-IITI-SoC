@@ -4,25 +4,55 @@ from langchain_core.messages import HumanMessage, AIMessage
 import uuid
 import asyncio
 import random
-
-from config import FLASK_HOST, FLASK_PORT, FLASK_SECRET_KEY, MODEL_CHOICE, INFO_LOGGING
-from config import GREETING_LABELS, SEND_OFF_LABELS, GREETING_RESPONSES, CONVERSATIONAL_RESPONSES
-from rag_chain_builder import rag_builder
-from batch_processor import batch_processor
-from query_classifier import query_classifier
-
 import logging
-logging.basicConfig(filename=INFO_LOGGING, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+from config import config
+
+from CustomPathwayPipeline.core import PathwayRetriever, RAGChainBuilder, LLMModelLoader, QueryClassifier
+from CustomPathwayPipeline.app import BatchProcessor
+
+logging.basicConfig(filename=config.DATA.INFO_LOGGING, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.secret_key = FLASK_SECRET_KEY
+app.secret_key = config.FLASK_APP.SECRET_KEY
+
+###### Initializing Module #######
+
+pathway_retriever = PathwayRetriever(
+    host=config.PATHWAY.HOST,
+    port=config.PATHWAY.PORT,
+    default_ref_link=config.PATHWAY.DEFAULT_REF_LINK,
+    num_docs_to_return=config.PATHWAY.k
+)
+
+rag_builder = RAGChainBuilder(
+    system_prompt_template=config.PROMPTS.SYSTEM_PROMPT,
+    human_prompt_template=config.PROMPTS.PROMPT_TEMPLATE,
+    retriever=pathway_retriever # Inject the initialized pathway_retriever
+)
+
+response_generator = LLMModelLoader(
+    model_name=config.MODEL.MODEL_REGISTRY[config.MODEL.MODEL_CHOICE],
+    device=config.MODEL.DEVICE,
+    generation_args=config.MODEL.GENERATION_ARGS
+)
+
+batch_processor = BatchProcessor(
+    llm_generator=response_generator, # Inject the initialized response_generator
+    max_batch_size=config.BATCHING.MAX_BATCH_SIZE,
+    batch_timeout_seconds=config.BATCHING.BATCH_TIMEOUT_SECONDS
+)
+
+query_classifier = QueryClassifier()
+
+###################################
 
 def get_user_memory() -> ConversationBufferMemory:
     """
         Retrieves or creates a ConversationBufferMemory for the current session.
         The actual messages are stored in the Flask session.
     """
-    # session.permanent = True # Optional
     if 'chat_messages' not in session:
         session['chat_messages'] = []
     
@@ -44,24 +74,24 @@ def save_user_memory_to_session(memory_messages: list):
 
 def handle_direct_response(user_query: str, user_memory: ConversationBufferMemory) -> str:
     """
-    Generates a direct response for conversational/greeting queries.
-    This can be a simple rule-based response or a lighter LLM call.
+    Generates a direct response for conversational/greeting queries using config settings.
     """
     
     query_lower = user_query.lower()
-    if any(keyword in query_lower for keyword in GREETING_LABELS):
-        response = random.choice(GREETING_RESPONSES)
-    elif any(keyword in query_lower for keyword in SEND_OFF_LABELS):
-        response = random.choice(CONVERSATIONAL_RESPONSES)
+    # Access conversational labels and responses from the new config structure
+    if any(keyword in query_lower for keyword in config.CONVERSATION.GREETING_LABELS):
+        response = random.choice(config.CONVERSATION.GREETING_RESPONSES)
+    elif any(keyword in query_lower for keyword in config.CONVERSATION.SEND_OFF_LABELS):
+        response = random.choice(config.CONVERSATION.CONVERSATIONAL_RESPONSES)
     else:
-        response = "Hello! How can I assist you today?"
+        # Fallback if no specific greeting/send-off, can also be customized in config
+        response = random.choice(config.CONVERSATION.GREETING_RESPONSES) # Re-use greeting responses for generic hello
     
     # Update the memory directly here since it's an immediate response
     user_memory.chat_memory.add_message(AIMessage(content=response))
     save_user_memory_to_session(user_memory.chat_memory.messages) # Save immediately
     
     return response
-
 
 @app.route("/", methods=["POST"])
 def chat():
@@ -76,14 +106,15 @@ def chat():
     user_memory = get_user_memory()
     
     if selected_label:
-
         original_message = session.pop('original_user_message', user_message)
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
+        # rag_builder.get_formatted_prompt now returns prompt, links, and keywords
         formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
         
-        logging.info("Files retrieved : ", reference_links)
+        # Use logging with f-string for better formatting with multiple args
+        logging.info(f"Files retrieved : {reference_links}")
         
         request_id = str(uuid.uuid4())
         try:
@@ -99,7 +130,7 @@ def chat():
             'formatted_prompt': formatted_prompt,
             'initial_chat_messages': session['chat_messages'], # Pass current messages
             'user_message': original_message,
-            'keywords': keywords
+            'keywords': keywords # Still pass keywords, though BatchProcessor might not use it generically
             
         }, future)
         
@@ -107,10 +138,12 @@ def chat():
 
     else:
         # Phase 1: Initial query, classify and ask for user intent
+        # query_classifier now uses its own internal map or a map passed during init
         probable_labels = query_classifier.classify_query(user_message)
         
         if not probable_labels:
-            # Default if no specific labels found
+            # Default if no specific labels found - this is handled by QueryClassifier's default_label
+            # but can be kept as a safeguard or for custom logic
             probable_labels = ["General Info"]
             
         session['original_user_message'] = user_message
@@ -136,14 +169,15 @@ def get_status(request_id):
 
         return jsonify({"status": status, "response": response}), 200
     elif status == "error":
-        return jsonify({"status": status, "message": result_data}), 500
+        return jsonify({"status": status, "message": str(result_data)}), 500 # Ensure error message is string
     else:
         return jsonify({"status": status, "message": result_data if result_data else "Processing..."}), 200
 
-
 @app.route("/")
 def index():
-    return f"RAG Chatbot is live using model: {MODEL_CHOICE}"
+    # Access MODEL_CHOICE from the new config structure
+    return f"RAG Chatbot is live using model: {config.MODEL.MODEL_CHOICE}"
 
 if __name__ == "__main__":
-    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)
+    # Access Flask app host and port from the new config structure
+    app.run(host=config.FLASK_APP.HOST, port=config.FLASK_APP.PORT, debug=True)

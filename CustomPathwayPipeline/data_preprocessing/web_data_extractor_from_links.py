@@ -3,8 +3,6 @@ import requests
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 import logging 
-from ParseLogs import LogParser
-from config import Text_DATA_DIR, PDF_DATA_DIR
 
 class KnowledgeBaseUpdater:
     
@@ -69,4 +67,4 @@ class KnowledgeBaseUpdater:
             else:
                 logging.warning(f"Knowledge base updated unsuccessful from {url}")
         
-webdata_updater = KnowledgeBaseUpdater(text_files_directory=Text_DATA_DIR, pdf_files_directory=PDF_DATA_DIR)
+# webdata_updater = KnowledgeBaseUpdater(text_files_directory=Text_DATA_DIR, pdf_files_directory=PDF_DATA_DIR)

@@ -1,21 +1,19 @@
 import pathway as pw
 from pathway.xpacks.llm.vector_store import VectorStoreServer
+
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
-from datetime import datetime
-from pathway.xpacks.llm.parsers import DoclingParser
-import os
-import re
-from config import ROOT_DATA_DIR, EMBEDDING_MODEL, CACHE_DIR, PATHWAY_HOST, PATHWAY_PORT, DEBUGGER_LOGGING
-from PDFSummarizer import PDFSummarizer
-from config import ROOT_DATA_DIR, MODEL_CHOICE
 from langchain_community.chat_models import ChatOllama
-from keyword_extractor import extract_keywords_from_string
+
+from config import PATHWAY_HOST, PATHWAY_PORT, EMBEDDING_MODEL, MODEL_CHOICE, CACHE_DIR, DEBUGGER_LOGGING, ROOT_DATA_DIR
+
+from CustomPathwayPipeline.data_preprocessing import PDFSummarizer, extract_keywords_from_string
 
 import logging
+
 logging.basicConfig(filename=DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# ==== initialize the required modules === 
 model = ChatOllama(model=MODEL_CHOICE, temperature=0.3)
 summarizer = PDFSummarizer(model=model, output_dir="PDFs_SUMMARIZED")
 
@@ -52,10 +50,6 @@ pdf_parsed = pdf_data.select(data=pw.apply_async(lambda b: summarize_pdf(b), pw.
 text_parsed = text_data.select(data=pw.apply(lambda b: b.decode("utf-8"), pw.this.content), _metadata=pw.this._metadata)
 
 data = text_parsed.concat_reindex(pdf_parsed)
-  
-pw.debug.compute_and_print(data.select(pw.this.data), include_id=False)
-
-pw.run()
 
 # After this the data_with_custom_metadata has (data: str, file_name: str, _metadata: pw.json("path":, "created_at":, "modified_at":, "seen_at": ,"size": ))
 @pw.udf
