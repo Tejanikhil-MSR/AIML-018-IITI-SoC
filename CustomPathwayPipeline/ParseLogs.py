@@ -2,10 +2,12 @@ import re
 from pathlib import Path
 from typing import List, Optional
 from config import Logdir
+import os
 
 class LogParser:
-    def __init__(self, base_path: str):
-        self.base_path = Path(base_path)
+    def __init__(self):
+        # nothing to be instantiated
+        pass
     
     @staticmethod
     def get_latest_created_folder(base_path) -> Optional[Path]:
@@ -34,13 +36,10 @@ class LogParser:
         return regenerated_link
 
     def parse(self) -> List[str]:
-        latest_folder = self.get_latest_created_folder(self.base_path)
-        links = []
         
-        if latest_folder is None:
-            return []
+        links = []
 
-        log_file_path = latest_folder / "info.log"
+        log_file_path = os.path.join(Logdir, "info.log")
         if not log_file_path.exists():
             raise FileNotFoundError(f"No log file found at: {log_file_path}")
 
@@ -52,4 +51,4 @@ class LogParser:
         return list(set(links))
 
 
-log_parser = LogParser(Logdir)
+log_parser = LogParser()

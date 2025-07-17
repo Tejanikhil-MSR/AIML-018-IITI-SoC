@@ -1,6 +1,0 @@
-Here is the processed output:
-
-```
-Startups/Companies/Institutions/Collaborations
-The Institute of Technology is inviting applications for a Junior Research Fellow position in their Council of scientific and industrial research project. The project aims to develop a system for overburden at opencast mines, and the ideal candidate will have strong skills in engineering and data science. The salary will be as per standard eligibility. Eligible candidates can apply by sending detailed academic background and work experience to Prof. Discipline of Civil Engineering via mail with subject line "Application for position in funded Project" latest by August 15, 2023. Incomplete applications will not be considered, and only shortlisted candidates will be called for an interview.
-```

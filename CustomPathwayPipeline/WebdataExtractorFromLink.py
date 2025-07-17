@@ -4,7 +4,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 import logging 
 from ParseLogs import LogParser
-
+from config import Text_DATA_DIR, PDF_DATA_DIR
 
 class KnowledgeBaseUpdater:
     
@@ -59,7 +59,7 @@ class KnowledgeBaseUpdater:
         return True
             
     def update(self, urls):
-        logging.info(f"Knowledge update started...... using logs from ./logs/{LogParser.get_latest_created_folder("./logs")}/info.log")
+        logging.info(f"Knowledge update started...... using logs from ./logs/info.log")
         for url in urls:
             updated = self._extractTextAndPdfs(url)
         
@@ -69,4 +69,4 @@ class KnowledgeBaseUpdater:
             else:
                 logging.warning(f"Knowledge base updated unsuccessful from {url}")
         
-webdata_updater = KnowledgeBaseUpdater(text_files_directory="../Data/UpdatedData/TextFiles", pdf_files_directory="../Data/UpdatedData/PDFFiles")
+webdata_updater = KnowledgeBaseUpdater(text_files_directory=Text_DATA_DIR, pdf_files_directory=PDF_DATA_DIR)

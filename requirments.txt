@@ -1,8 +1,20 @@
-# Pathway - A real time straming tool
+# create a virtual environment with python version as 3.10 as unstructured supports 3.10
+
+# install ollama to perform input pdfs summarization using `sudo snap install ollama`
+
+# install unstructured libraries for pdf data extraction
+unstructured[all-docs]
+
+# install tesseract-ocr engine on your local system using `sudo apt install tesseract-ocr`
+# Ensure that tesseract is being detected by your environment
+pytesseract
+
+# install pathway libraries
 pathway[xpack-llm]
 pathway[xpack-llm-docs]
+
+# Optional : To perform keyword extraction and document clustering 
 sentence-transformers
-python-dotenv # for env
 
-flask # for app
-
+# For API
+flask

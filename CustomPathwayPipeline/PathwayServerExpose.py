@@ -7,16 +7,20 @@ from datetime import datetime
 from pathway.xpacks.llm.parsers import DoclingParser
 import os
 import re
-from config import DATA_DIR, EMBEDDING_MODEL, CACHE_DIR, PATHWAY_HOST, PATHWAY_PORT, DEBUGGER_LOGGING
+from config import ROOT_DATA_DIR, EMBEDDING_MODEL, CACHE_DIR, PATHWAY_HOST, PATHWAY_PORT, DEBUGGER_LOGGING
+from PDFSummarizer import PDFSummarizer
+from config import ROOT_DATA_DIR, MODEL_CHOICE
+from langchain_community.chat_models import ChatOllama
 
 import logging
 logging.basicConfig(filename=DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-parser = DoclingParser()
+model = ChatOllama(model=MODEL_CHOICE, temperature=0.3)
+summarizer = PDFSummarizer(model=model, output_dir="PDFs_SUMMARIZED")
 
 # === 1. Load data from filesystem in streaming mode (with metadata) ===
 data_table = pw.io.fs.read(
-    DATA_DIR,
+    ROOT_DATA_DIR,
     format="binary",
     mode="streaming",
     with_metadata=True,
@@ -32,12 +36,18 @@ def detect_type(file_path: str) -> str:
     else:
         return "unknown"
 
+@pw.udf
+def summarize_pdf(metadata:dict)->str:
+    metadata_dict = metadata.as_dict()
+    pdf_summary = summarizer.summarize_pdf(metadata_dict["path"], save_as=False)
+    return pdf_summary
+
 typed_data = data_table.select(content=data_table["data"], path=data_table._metadata["path"], file_type=detect_type(pw.this._metadata["path"]), _metadata=data_table._metadata)
 
 text_data = typed_data.filter(typed_data.file_type == "text")
 pdf_data = typed_data.filter(typed_data.file_type == "pdf")
 
-pdf_parsed = pdf_data.select(data=pw.apply_async(lambda b: parser.parse(b)["text"], pw.this.content), _metadata=pw.this._metadata)
+pdf_parsed = pdf_data.select(data=pw.apply_async(lambda b: summarize_pdf(b), pw.this._metadata), _metadata=pw.this._metadata)
 text_parsed = text_data.select(data=pw.apply(lambda b: b.decode("utf-8"), pw.this.content), _metadata=pw.this._metadata)
 
 data = text_parsed.concat_reindex(pdf_parsed)
@@ -78,5 +88,5 @@ server.run_server(
 )
 
 print(f"Pathway Vector Store Server running on {PATHWAY_HOST}:{PATHWAY_PORT}")
-print(f"Monitoring directory: {DATA_DIR}")
+print(f"Monitoring directory: {ROOT_DATA_DIR}")
 print(f"Embedding model: {EMBEDDING_MODEL}")

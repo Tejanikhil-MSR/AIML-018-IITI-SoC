@@ -80,7 +80,6 @@ def cluster_documents_with_hdbscan(folder_path, min_cluster_size=5, min_samples=
 
     return cluster_result
 
-
 def _visualize_clusters(embeddings, labels, clusterer):
     """Plot UMAP embeddings with HDBSCAN cluster labels."""
     plt.figure(figsize=(12, 8))
@@ -107,8 +106,7 @@ def _visualize_clusters(embeddings, labels, clusterer):
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     plt.show()
-    
-
+ 
 def generate_cluster_names(cluster_dict, folder_path, top_n=3):
     """
     Generate names for clusters based on TF-IDF keywords.

@@ -17,19 +17,22 @@ class QueryClassifier:
         
         probable_labels = []
         
-
         if "admission" in query_lower or "apply" in query_lower or "entrance" in query_lower or "eligibility" in query_lower:
             probable_labels.append("Admissions")
-        if "course" in query_lower or "program" in query_lower or "syllabus" in query_lower or "department" in query_lower:
+        
+        if "course" in query_lower or "program" in query_lower or "syllabus" in query_lower or "department" in query_lower or "academics" in query_lower:
             probable_labels.append("Academics")
-        if "hostel" in query_lower or "mess" in query_lower or "club" in query_lower or "sports" in query_lower:
+        
+        if "hostel" in query_lower or "mess" in query_lower or "club" in query_lower or "sports" in query_lower or "student life" in query_lower:
             probable_labels.append("Student Life")
+        
         if "research" in query_lower or "project" in query_lower or "publication" in query_lower or "phd" in query_lower:
             probable_labels.append("Research")
+        
         if "event" in query_lower or "workshop" in query_lower or "conference" in query_lower or "seminar" in query_lower:
             probable_labels.append("Events")
 
-        if not any(label in probable_labels for label in ["Admissions", "Academics", "Student Life", "Research", "Events", "Retrieval"]):
+        if not any(label in probable_labels for label in ["Admissions", "Academics", "Student Life", "Research", "Events"]):
             if "General Info" not in probable_labels:
                 probable_labels.append("General Info")
 

@@ -12,28 +12,24 @@ MODEL_REGISTRY = {
 
 DEVICE = "cuda" # Default, will try to fall back to CPU
 
-# --- Generation Arguments ---
-GENERATION_ARGS = {
-    "max_new_tokens": 200,
-    "do_sample": True,
-    "temperature": 0.7,
-    "top_p": 0.9,
-    "repetition_penalty": 1.1,
-    "use_cache": True # KV-Cache
-}
+# --- Response Generation Arguments ---
+# use_cache = True ==> KVCache
+GENERATION_ARGS = {"max_new_tokens": 200, "do_sample": True, "temperature": 0.7, "top_p": 0.9, "repetition_penalty": 1.1, "use_cache": True}
 
 # --- Pathway Vector Store Configuration ---
 PATHWAY_HOST = "127.0.0.1"
 PATHWAY_PORT = 8101
 DEFAULT_REF_LINK = "www.iiti.ac.in" # Default reference link if metadata is missing
 
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
 Logdir = "./logs"
-os.mkdir(f"{Logdir}/{timestamp}")
-DEBUGGER_LOGGING = f"./logs/{timestamp}/pathway_server_debug.log"
-INFO_LOGGING = f"./logs/{timestamp}/info.log"
+DEBUGGER_LOGGING = f"{Logdir}/pathway_server_debug.log"
+INFO_LOGGING = f"{Logdir}/info.log"
 
-DATA_DIR = "../Documentations/"
+
+ROOT_DATA_DIR = "../Documentations/"
+PDF_DATA_DIR = os.path.join(ROOT_DATA_DIR, "PDFFiles")
+Text_DATA_DIR = os.path.join(ROOT_DATA_DIR, "TextFiles")
+
 EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"  # Or use 'bge-large-en-v1.5' for higher accuracy (needs more RAM)
 CACHE_DIR = "./Cache"
 

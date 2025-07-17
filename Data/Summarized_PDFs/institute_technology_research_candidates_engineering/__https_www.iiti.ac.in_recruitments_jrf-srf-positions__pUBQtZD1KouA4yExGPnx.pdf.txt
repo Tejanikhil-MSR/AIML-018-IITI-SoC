@@ -1,6 +1,0 @@
-Here is the output:
-
-```
-Rules&Regulations/Policies
-The Institute of Technology has announced a new policy for Senior Research Fellow positions. According to the policy, eligibility criteria include first-class degrees in relevant fields such as Mechanical Metallurgy Engineering and Material science, Electronics, and Instrumentation Control. Applicants must also have GATE qualification and two years of research experience. The appointment is initially for one year and may be extended based on performance. The deadline for applications is June 2025 by 00.
-```
