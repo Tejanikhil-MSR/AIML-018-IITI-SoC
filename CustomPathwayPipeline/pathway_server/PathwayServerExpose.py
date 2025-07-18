@@ -15,7 +15,7 @@ logging.basicConfig(filename=DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG
 
 # ==== initialize the required modules === 
 model = ChatOllama(model=MODEL_CHOICE, temperature=0.3)
-summarizer = PDFSummarizer(model=model, output_dir="PDFs_SUMMARIZED")
+summarizer_service = PDFSummarizer(model=model, output_dir="PDFs_SUMMARIZED")
 
 # === 1. Load data from filesystem in streaming mode (with metadata) ===
 data_table = pw.io.fs.read(
@@ -36,17 +36,21 @@ def detect_type(file_path: str) -> str:
         return "unknown"
 
 @pw.udf
-def summarize_pdf(metadata:dict)->str:
-    metadata_dict = metadata.as_dict()
-    pdf_summary = summarizer.summarize_pdf(metadata_dict["path"], save_as=False)
-    return pdf_summary
+async def async_summarize_pdf(metadata:str)->str:
+    try:
+        pdf_summary = await summarizer_service.summarize_pdf(metadata, save_as=False)
+        return pdf_summary
+    
+    except Exception as e:
+        print(f"[ERROR] Error summarizing PDF {metadata}: {e}")
+        return f"Error summarizing PDF: {str(e)}"
 
 typed_data = data_table.select(content=data_table["data"], path=data_table._metadata["path"], file_type=detect_type(pw.this._metadata["path"]), _metadata=data_table._metadata)
 
 text_data = typed_data.filter(typed_data.file_type == "text")
 pdf_data = typed_data.filter(typed_data.file_type == "pdf")
 
-pdf_parsed = pdf_data.select(data=pw.apply_async(lambda b: summarize_pdf(b), pw.this._metadata), _metadata=pw.this._metadata)
+pdf_parsed = pdf_data.select(data=pw.apply_async(async_summarize_pdf, pw.this._metadata["path"]), _metadata=pw.this._metadata)
 text_parsed = text_data.select(data=pw.apply(lambda b: b.decode("utf-8"), pw.this.content), _metadata=pw.this._metadata)
 
 data = text_parsed.concat_reindex(pdf_parsed)

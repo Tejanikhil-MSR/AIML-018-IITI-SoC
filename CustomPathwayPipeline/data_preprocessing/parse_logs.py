@@ -49,6 +49,3 @@ class LogParser:
             links.append(self._convert_into_link(file_path))
         
         return list(set(links))
-
-
-log_parser = LogParser()

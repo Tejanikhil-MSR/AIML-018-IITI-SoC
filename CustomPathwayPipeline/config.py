@@ -41,7 +41,7 @@ class DataConfig:
     DEBUGGER_LOGGING: str = field(init=False)
     INFO_LOGGING: str = field(init=False)
     
-    ROOT_DATA_DIR: str = "../Documentations/"
+    ROOT_DATA_DIR: str = "../Data/"
     PDF_DATA_DIR: str = field(init=False)
     TEXT_DATA_DIR: str = field(init=False)
 

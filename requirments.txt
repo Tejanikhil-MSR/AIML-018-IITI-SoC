@@ -25,3 +25,6 @@ flask
 nltk
 keybert
 regex
+
+# install onnxruntime-gpu to make the unstructured pdf parser is benefitted on the gpu
+# used only when strategy=`hi_res`
