@@ -1,4 +1,4 @@
-# create a virtual environment with python version as 3.10 as unstructured supports 3.10
+# create a virtual environment with python version as 3.9.1 as unstructured supports 3.9.1
 
 # install ollama to perform input pdfs summarization using `sudo snap install ollama`
 
@@ -17,6 +17,7 @@ pathway[xpack-llm-docs]
 
 # Optional : To perform keyword extraction and document clustering 
 sentence-transformers
+bitsandbytes
 
 # For API
 flask
@@ -28,3 +29,6 @@ regex
 
 # install onnxruntime-gpu to make the unstructured pdf parser is benefitted on the gpu
 # used only when strategy=`hi_res`
+
+
+# Try `pip install -r requirements.txt --force-reinstall --no-cache-dir` if there is dependencies mismatch

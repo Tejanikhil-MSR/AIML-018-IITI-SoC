@@ -1,0 +1,42 @@
+name: unstructured_env # Renamed for clarity based on your description
+channels:
+  - conda-forge # Recommended for many scientific packages and better MKL/binary handling
+  - defaults
+dependencies:
+  - python=3.9.1 # As requested
+  - pip
+
+  # Core libraries often best installed via conda for binary compatibility
+  - mkl
+  - mkl-service
+  - numpy # Often a core dependency for many ML/NLP libraries
+  - scipy # Often a core dependency
+  - pytorch # If you need PyTorch, specify CPU or CUDA version as needed, e.g., pytorch::pytorch-cuda=11.8 or pytorch::pytorch-cpu
+  - transformers # Core Hugging Face library
+  - onnxruntime-gpu # For GPU acceleration with unstructured (if available via conda for your setup)
+  
+  # Dependencies that are typically installed via pip, including those with extras
+  - pip:
+    - unstructured[all-docs] # For comprehensive PDF data extraction
+    - langchain
+    - langchain-community
+    - pytesseract # Python wrapper for Tesseract-OCR
+    - pathway[xpack-llm] # Pathway LLM integration
+    - pathway[xpack-llm-docs] # Pathway LLM documentation related tools
+    - sentence-transformers # For keyword extraction and document clustering
+    - bitsandbytes # Optional, for 8-bit quantization with transformers
+    - flask # For API
+    - nltk # For keyword extraction
+    - keybert # For keyword extraction
+    - regex # For keyword extraction
+
+# --- IMPORTANT SYSTEM-LEVEL INSTALLATIONS ---
+# These cannot be installed via conda or pip and must be installed separately:
+#
+# 1. Install Ollama:
+#    sudo snap install ollama
+#
+# 2. Install Tesseract-OCR engine:
+#    sudo apt install tesseract-ocr
+#    Ensure tesseract is in your system's PATH and detected by pytesseract.
+# --------------------------------------------

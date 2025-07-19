@@ -41,7 +41,7 @@ class DataConfig:
     DEBUGGER_LOGGING: str = field(init=False)
     INFO_LOGGING: str = field(init=False)
     
-    ROOT_DATA_DIR: str = "../Data/"
+    ROOT_DATA_DIR: str = "./Data/"
     PDF_DATA_DIR: str = field(init=False)
     TEXT_DATA_DIR: str = field(init=False)
 
@@ -79,6 +79,20 @@ class PromptsConfig:
         "You are a friendly and helpful AI assistant for IIT Indore. You answer questions about admissions, "
         "academics, campus life, and events. Always be polite and concise."
     )
+
+    SUMMARIZATION_PROMPT : str = """
+You are an AI assistant tasked with summarizing tables and rewriting the text content without any noise.
+Given a table, convert it into a concise summary that captures the key information. 
+Given a text, rewrite the whole text by removing any noise and making it more readable.
+
+For text, respond only with the rewritten text and for the table respond with a concise summary of the table content.
+Do not start your message by saying "Here is a summary" or anything like that.
+
+just give me what i have asked for. 
+
+Table or text chunk : {element}
+"""
+
     # Using multiline string for readability of the template
     PROMPT_TEMPLATE: str = f"""
 [INST]

@@ -1,16 +1,20 @@
 from flask import Flask, request, jsonify, session
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import HumanMessage, AIMessage
+from transformers import BitsAndBytesConfig
+import torch
 import uuid
 import asyncio
 import random
 import logging
+import sys
 
+sys.path.append("../")
 
-from config import config
+from CustomPathwayPipeline.config import config # type: ignore
 
-from CustomPathwayPipeline.core import PathwayRetriever, RAGChainBuilder, LLMModelLoader, QueryClassifier
-from CustomPathwayPipeline.app import BatchProcessor
+from CustomPathwayPipeline.core import PathwayRetriever, RAGChainBuilder, LLMModelLoader, QueryClassifier # type: ignore
+from CustomPathwayPipeline.app import BatchProcessor # type: ignore
 
 logging.basicConfig(filename=config.DATA.INFO_LOGGING, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -32,10 +36,17 @@ rag_builder = RAGChainBuilder(
     retriever=pathway_retriever # Inject the initialized pathway_retriever
 )
 
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    llm_int8_threshold=6.0,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
 response_generator = LLMModelLoader(
     model_name=config.MODEL.MODEL_REGISTRY[config.MODEL.MODEL_CHOICE],
     device=config.MODEL.DEVICE,
-    generation_args=config.MODEL.GENERATION_ARGS
+    generation_args=config.MODEL.GENERATION_ARGS,
+    quantization_config=bnb_config
 )
 
 batch_processor = BatchProcessor(

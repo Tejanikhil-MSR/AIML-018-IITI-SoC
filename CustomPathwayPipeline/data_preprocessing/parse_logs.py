@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import List, Optional
-from config import Logdir
+from config import config
 import os
 
 class LogParser:
@@ -39,7 +39,7 @@ class LogParser:
         
         links = []
 
-        log_file_path = os.path.join(Logdir, "info.log")
+        log_file_path = os.path.join(config.DATA.LOG_DIR, "info.log")
         if not log_file_path.exists():
             raise FileNotFoundError(f"No log file found at: {log_file_path}")
 

@@ -18,11 +18,7 @@ class LLMModelLoader:
         self.tokenizer = self._load_tokenizer()
 
         # Use provided quantization_config or default to BitsAndBytesConfig
-        self.bnb_config = quantization_config if quantization_config else BitsAndBytesConfig(
-            load_in_4bit=True,
-            llm_int8_threshold=6.0,
-            bnb_4bit_compute_dtype=torch.float16
-        )
+        self.bnb_config = quantization_config
 
         self.model = self._load_model()
 

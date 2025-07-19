@@ -3,10 +3,13 @@ from unstructured.partition.pdf import partition_pdf
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import asyncio
+import sys
+
+sys.path.append("../")
 
 class PDFSummarizer:
     
-    def __init__(self, model, output_dir: str):
+    def __init__(self, model, summarize_prompt_template, output_dir: str):
         """
         Initialize the PDF summarizer.
 
@@ -16,18 +19,6 @@ class PDFSummarizer:
         """
         self.model = model
         self.output_dir = output_dir
-
-        # Prepare summarization prompt
-        summarize_prompt_template = """
-        You are an AI assistant tasked with summarizing content.
-        Provide a concise and informative summary of the following text or table content.
-        Focus on the main points and key information.
-
-        Content:
-        {element}
-
-        Summary:
-        """
         
         summarize_prompt = ChatPromptTemplate.from_template(summarize_prompt_template)
         self.summarize_chain = summarize_prompt | self.model | StrOutputParser()
@@ -60,10 +51,10 @@ class PDFSummarizer:
             elif any(t in str(type(chunk)) for t in ["CompositeElement", "NarrativeText", "Title"]):
                 texts.append(chunk)
 
-        all_summaries_coroutines = [] # Collect coroutines for concurrent invocation
+        all_summaries_coroutines = []
 
         for chunk in texts:
-            if chunk.text: # Only summarize non-empty text
+            if chunk.text:
                 summary = self.summarize_chain.ainvoke({"element": chunk.text})
                 all_summaries_coroutines.append(summary)
                 
@@ -76,12 +67,10 @@ class PDFSummarizer:
                 all_summaries_coroutines.append(summary)
 
         if all_summaries_coroutines:
-            # Use asyncio.gather to run coroutines in parallel
+
             summaries = await asyncio.gather(*all_summaries_coroutines, return_exceptions=True)
-            # Filter out exceptions if any occurred during individual summarizations
             all_summaries = [s for s in summaries if not isinstance(s, Exception)]
             
-            # If some summarizations failed, potentially add a note
             if any(isinstance(s, Exception) for s in summaries):
                 print(f"[WARNING] Some chunk summarizations failed: {[str(e) for e in summaries if isinstance(e, Exception)]}")
 
@@ -91,15 +80,14 @@ class PDFSummarizer:
         final_summary = "No content found in PDF."
         if all_summaries:
             combined_summary_input = "\n\n".join(all_summaries)
-            if combined_summary_input: # Only try to summarize if there's content to summarize
+            if combined_summary_input:
                 try:
                     final_summary = await self.summarize_chain.ainvoke({"element": combined_summary_input})
                 except Exception as e:
                     print(f"[ERROR] Final summarization failed: {e}")
-                    final_summary = combined_summary_input # Fallback to combined text if final summary fails
+                    final_summary = combined_summary_input
 
         if save_as:
-            # Ensure output directory exists
             os.makedirs(self.output_dir, exist_ok=True)
             
             with open(output_file_path, "w", encoding="utf-8") as f:

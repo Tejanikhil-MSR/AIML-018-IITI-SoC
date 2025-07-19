@@ -1,7 +1,5 @@
 from langchain_community.vectorstores import PathwayVectorClient
 from langchain_core.runnables import RunnableLambda
-# Still import from config for default values if not explicitly provided
-from config import PATHWAY_HOST, PATHWAY_PORT, DEFAULT_REF_LINK
 
 class PathwayRetriever:
     """
@@ -45,9 +43,11 @@ class PathwayRetriever:
         for doc in docs[0:self.num_docs_to_return]:
             formatted_context.append(doc.page_content)
             # Accessing 'filename' from metadata as per your Pathway server setup
-            reference_links.append(doc.metadata.get("filename", self.default_ref_link))
-            keywords.append(doc.metadata.get("keywords", " "))
-               
+            reference_links.append(doc.metadata["filename"])
+            keywords.append(doc._metadata["keywords"])
+
+        print(formatted_context, reference_links, keywords)  # Debugging output to check retrieved links and keywords
+
         return {
             "context": "\n\n".join(formatted_context),
             "reference_links": "\n".join(reference_links),
