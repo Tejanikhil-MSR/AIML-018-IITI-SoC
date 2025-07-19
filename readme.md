@@ -84,6 +84,11 @@ The dataset can be accessed here:
 👉 [IITI QA Dataset (Google Drive)](https://drive.google.com/drive/folders/1ubBSaZ34idOf1ZyN_RhGli2YiKKV3Czw)
 
 
+Updated link of dataset:
+👉 [IITI QA Dataset (Hugging Face)](https://huggingface.co/datasets/ankitK-11/iiti-bot-dataset/tree/main)
+
+
+
 ---
 
 ## 📞 Contact
