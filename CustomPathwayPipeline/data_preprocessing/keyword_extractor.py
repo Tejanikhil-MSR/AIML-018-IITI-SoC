@@ -10,6 +10,7 @@ import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+
 def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
     """
     Extract top keywords from a single string using TF-IDF + KeyBERT
@@ -21,7 +22,7 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
     Returns:
         List[str]: Final ranked keywords
     """
-    stop_words = set(stopwords.words('english'))
+    stop_words = list(set(stopwords.words('english')))
     lemmatizer = WordNetLemmatizer()
     kw_model = KeyBERT()
 
@@ -40,7 +41,7 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
     )
     tfidf_matrix = vectorizer.fit_transform([preprocessed_text])
     feature_names = vectorizer.get_feature_names_out()
-    tfidf_scores = tfidf_matrix.toarray().flatten()
+    tfidf_scores = tfidf_matrix.todense().toarray().flatten()
     tfidf_top_indices = np.argsort(tfidf_scores)[-n_keywords*2:][::-1]
     tfidf_keywords = [feature_names[i] for i in tfidf_top_indices if tfidf_scores[i] > 0]
 
@@ -49,9 +50,9 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
         text_data,
         keyphrase_ngram_range=(1, 2),
         stop_words='english',
-        top_n=n_keywords * 3,
+        top_n=n_keywords * 2,
         use_mmr=True,
-        diversity=0.7
+        diversity=0.5
     )
     keybert_kws = [(kw[0], kw[1]) for kw in keybert_kws]
 
@@ -65,7 +66,7 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
         if kw in feature_names:
             idx = np.where(feature_names == kw)[0][0]
             uniqueness_score = tfidf_scores[idx]
-        keyword_scores[kw] = 0.7 * relevance_score + 0.3 * uniqueness_score
+        keyword_scores[kw] = 0.7 * relevance_score + 0.3 * uniqueness_score # type: ignore
 
     final_keywords = sorted(keyword_scores.items(), key=lambda x: x[1], reverse=True)
     return [kw for kw, _ in final_keywords[:n_keywords]]

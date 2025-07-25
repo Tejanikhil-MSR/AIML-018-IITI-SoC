@@ -23,11 +23,11 @@ class PDFSummarizer:
         summarize_prompt = ChatPromptTemplate.from_template(summarize_prompt_template)
         self.summarize_chain = summarize_prompt | self.model | StrOutputParser()
     
-    async def summarize_pdf(self, pdf_path: str, save_as=True) -> str:
+    async def summarize_pdf(self, pdf_path: str, save_as=True):
         
         if not os.path.exists(pdf_path):
             print(f"[ERROR] PDF not found: {pdf_path}")
-            return
+            return 
 
         pdf_filename = os.path.basename(pdf_path)
         output_file_path = os.path.join(self.output_dir, f"{os.path.splitext(pdf_filename)[0]}.txt")
@@ -42,7 +42,7 @@ class PDFSummarizer:
 
         except Exception as e:
             print(f"[ERROR] Failed to extract PDF: {e}")
-            return
+            return "No content found in PDF."
 
         texts, tables = [], []
         for chunk in chunks:
@@ -69,7 +69,7 @@ class PDFSummarizer:
         if all_summaries_coroutines:
 
             summaries = await asyncio.gather(*all_summaries_coroutines, return_exceptions=True)
-            all_summaries = [s for s in summaries if not isinstance(s, Exception)]
+            all_summaries = [str(s) for s in summaries if not isinstance(s, Exception)]
             
             if any(isinstance(s, Exception) for s in summaries):
                 print(f"[WARNING] Some chunk summarizations failed: {[str(e) for e in summaries if isinstance(e, Exception)]}")
@@ -94,7 +94,7 @@ class PDFSummarizer:
                 f.write(f"--- Summary for {pdf_filename} ---\n\n")
                 f.write(final_summary)
                 f.write("\n")
-            print(f"✅ Summary written to: {output_file_path}")
+            print(f"Summary written to: {output_file_path}")
 
         return final_summary
 

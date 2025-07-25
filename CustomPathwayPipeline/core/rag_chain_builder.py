@@ -1,13 +1,15 @@
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
 from datetime import datetime
+from typing import Any
+
 
 class RAGChainBuilder:
     """
     Builds the RAG prompt by combining context, chat history, and user query.
     Made generic to accept prompt templates and a retriever instance.
     """
-    def __init__(self, system_prompt_template: str, human_prompt_template: str, retriever: any): # Type hint 'any' for flexibility, could be a more specific protocol/interface
+    def __init__(self, system_prompt_template: str, human_prompt_template: str, retriever: Any):
         """
         Initializes the RAGChainBuilder.
 
@@ -26,7 +28,7 @@ class RAGChainBuilder:
 
         self.augment_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
 
-    def get_formatted_prompt(self, user_query: str, user_memory: ConversationBufferMemory, label: str = None) -> tuple[str, str, str]:
+    def get_formatted_prompt(self, user_query: str, user_memory: ConversationBufferMemory, label: str | None = None) -> tuple[str, str, str]:
         """
         Retrieves the documents via the provided retriever and formats the prompt.
 
@@ -44,7 +46,6 @@ class RAGChainBuilder:
 
         query_for_retrieval = f"[{label}] {user_query}" if label else user_query
 
-        # Use the injected retriever
         docs_result = self.retriever.get_context_and_links(query_for_retrieval)
 
         temp_chain_data = {
@@ -55,16 +56,14 @@ class RAGChainBuilder:
             "chat_history": user_memory.chat_memory.messages
         }
 
-        print(f"Retrieved Reference Links: {docs_result['reference_links']}") # Updated print statement for clarity
-        print(f"Retrieved Keywords: {docs_result.get('keywords', 'N/A')}") # Print keywords for debugging
+        # print(f"Retrieved Reference Links: {docs_result['reference_links']}")
+        # print(f"Retrieved Keywords: {docs_result.get('keywords', 'N/A')}")
 
         prompt_value = self.augment_prompt.invoke(temp_chain_data)
 
-        # Return prompt string, reference links, and keywords
         return prompt_value.to_string(), docs_result["reference_links"], docs_result.get("keywords", "")
 
 
-# Example of how to use it with custom prompt templates or a different retriever
 # custom_system_prompt = "You are a helpful assistant."
 # custom_human_prompt = "Please answer the question: {question} based on context: {context}"
 # class CustomRetriever:

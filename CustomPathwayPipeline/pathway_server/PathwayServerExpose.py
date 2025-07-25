@@ -1,98 +1,109 @@
+import sys
+sys.path.append("../")
+
 import pathway as pw
 from pathway.xpacks.llm.vector_store import VectorStoreServer
-import sys
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.chat_models import ChatOllama
-sys.path.append("../")
-
 from CustomPathwayPipeline.config import config
-
 from CustomPathwayPipeline.data_preprocessing import PDFSummarizer, extract_keywords_from_string
 
-import logging
+import asyncio
 
+import logging
 logging.basicConfig(filename=config.DATA.DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+from helpers import detect_type, pre_process_text, async_summarize_pdf
 
 # ==== initialize the required modules === 
 model = ChatOllama(model=config.MODEL.MODEL_CHOICE, temperature=0.3)
 summarizer_service = PDFSummarizer(model=model, summarize_prompt_template=config.PROMPTS.SUMMARIZATION_PROMPT, output_dir="PDFs_SUMMARIZED")
 
-# === 1. Load data from filesystem in streaming mode (with metadata) ===
-data_table = pw.io.fs.read(
-    config.DATA.ROOT_DATA_DIR,
-    format="binary",
-    mode="streaming",
-    with_metadata=True,
-)
+def server_init():
 
-@pw.udf
-def detect_type(file_path: str) -> str:
-    import os
-    clean_file_path = str(file_path).strip('\"')
-    if clean_file_path.endswith('.txt'):
-        return "text"
-    elif clean_file_path.endswith('.pdf'):
-        return "pdf"
-    else:
-        logging.warning(f"[WARNING] Unsupported file type for path: {file_path}")
-        return "unknown"
+    @pw.udf(executor=pw.udfs.async_executor())
+    async def parse_content(content: bytes, path: str) -> bytes:
+        if detect_type(path)=="text":
+            decoded_content = content.decode("utf8")
+            processed_content = await asyncio.to_thread(pre_process_text, decoded_content)
+            return processed_content.encode(encoding="utf-8", errors="strict")
+        
+        elif detect_type(path)=="pdf":
+            summarized_content = await async_summarize_pdf(path, summarizer_service)
+            return summarized_content.encode(encoding="utf-8", errors="strict")
+        
+        else:
+            logging.warning(f"[WARNING] Unsupported file type for path: {path}")
+            return b"Unsupported file type"
 
-@pw.udf(executor=pw.udfs.async_executor())
-async def async_summarize_pdf(metadata:any)->str:
-    pdf_path = str(metadata).strip('\"')
-    try:
-        print(pdf_path)
-        pdf_summary = await summarizer_service.summarize_pdf(str(pdf_path), save_as=False)
-        logging.info(f"[INFO] Successfully summarized PDF: {pdf_summary}")
-        return pdf_summary
+    @pw.udf
+    def augment_metadata(text, metadata) -> dict:
+        metadata = metadata.as_dict()
+        metadata["filename"] = str(metadata["path"]).split("/")[-1]
+        metadata["keywords"] = ", ".join(extract_keywords_from_string(text.decode('utf-8', 'strict'), 10))
+        del metadata["path"]
+        return metadata
+
+    # === 1 : Load data from filesystem in streaming mode (with metadata) ===
+    data_table = pw.io.fs.read(
+        config.DATA.ROOT_DATA_DIR,
+        format="binary",
+        mode="streaming",
+        with_metadata=True, 
+        autocommit_duration_ms=1500, 
+    )
+    # Expected Schema: (data_table)
+    # |--- data          : bytes
+    # |--- _metadata     : pw.Json(path: str, created_at: int, modified_at: int, seen_at: int, size: int)
     
-    except Exception as e:
-        logging.error(f"[ERROR] Error summarizing PDF {pdf_path}: {e}")
-        return f"Error summarizing PDF: {str(e)}"
+    # === 2 : parse the data based on the file_types ===
+    data = data_table.select(data=parse_content(data_table.data, data_table._metadata["path"]), _metadata=data_table._metadata)
+    # Expected Schema: (data)
+    # |--- data          : bytes
+    # |--- _metadata     : pw.Json(path: str, created_at: int, modified_at: int, seen_at: int, size: int)
+    
+    # === 3 : augment metadata with additional information ===
+    data = data.with_columns(_metadata=augment_metadata(pw.this.data, pw.this._metadata))
+    # Expected Schema:
+    # |--- data          : bytes
+    # |--- _metadata     : pw.Json(filename: str, keywords: str, created_at: int, modified_at: int, seen_at: int, size: int)
+    # Note: The original 'path' from _metadata is replaced by 'filename' and 'keywords' are added.
+    
+    # pw.debug.compute_and_print(data, include_id=False)
 
-typed_data = data_table.select(content=data_table["data"], path=data_table._metadata["path"], file_type=detect_type(pw.this._metadata["path"]), _metadata=data_table._metadata)
+    # === 4 : Initialize the embedder from hugging face ===
+    embeddings = HuggingFaceEmbeddings(model_name=config.PATHWAY.EMBEDDING_MODEL,  model_kwargs = {'device': 'cpu'})
 
-text_data = typed_data.filter(typed_data.file_type == "text")
-pdf_data = typed_data.filter(typed_data.file_type == "pdf")
+    # === 5 : Initialize a chunker to split the documents ===
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=800,
+        chunk_overlap=150,
+        separators=["\n\n", "\n", ".", " ", ""]  # Prioritize paragraph/sentence boundaries
+    )
 
-pdf_parsed = pdf_data.select(data=async_summarize_pdf(pw.this._metadata["path"]), _metadata=pw.this._metadata)
-text_parsed = text_data.select(data=pw.apply(lambda b: b.decode("utf-8"), pw.this.content), _metadata=pw.this._metadata)
+    # === 6 : Create the Vector Store Server ===
+    server = VectorStoreServer.from_langchain_components(
+        data,
+        embedder=embeddings,
+        splitter=splitter,
+    )
 
-data = text_parsed.concat_reindex(pdf_parsed)
+    return server
 
-# After this the data_with_custom_metadata has (data: str, file_name: str, _metadata: pw.json("path":, "created_at":, "modified_at":, "seen_at": ,"size": ))
-@pw.udf
-def augment_metadata(text, metadata: pw.Json) -> dict:
-    metadata = metadata.as_dict()
-    metadata["filename"] = metadata["path"].split("/")[-1]
-    metadata["keywords"] = "<keyword>".join(extract_keywords_from_string(text, 10))
-    del metadata["path"]
-    return metadata
+if __name__=="__main__":
 
-data = data.with_columns(_metadata=augment_metadata(pw.this._metadata))
+    server = server_init()
 
-embeddings = HuggingFaceEmbeddings(model_name=config.PATHWAY.EMBEDDING_MODEL,  model_kwargs = {'device': 'cpu'})
+    # === 7 : start the server with caching enabled ===
+    server.run_server(
+        host=config.PATHWAY.HOST,
+        port=config.PATHWAY.PORT,
+        with_cache=True,
+        cache_backend=pw.persistence.Backend.filesystem(config.PATHWAY.CACHE_DIR)
+    )
 
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=800,
-    chunk_overlap=150,
-    separators=["\n\n", "\n", ".", " ", ""]  # Prioritize paragraph/sentence boundaries
-)
 
-server = VectorStoreServer.from_langchain_components(
-    data,
-    embedder=embeddings,
-    splitter=splitter,
-)
-
-server.run_server(
-    host=config.PATHWAY.HOST,
-    port=config.PATHWAY.PORT,
-    with_cache=True,
-    cache_backend=pw.persistence.Backend.filesystem(config.PATHWAY.CACHE_DIR)
-)
-
-print(f"Pathway Vector Store Server running on {config.PATHWAY.HOST}:{config.PATHWAY.PORT}")
-print(f"Monitoring directory: {config.DATA.ROOT_DATA_DIR}")
-print(f"Embedding model: {config.PATHWAY.EMBEDDING_MODEL}")
+    print(f"Pathway Vector Store Server running on {config.PATHWAY.HOST}:{config.PATHWAY.PORT}")
+    print(f"Monitoring directory: {config.DATA.ROOT_DATA_DIR}")
+    print(f"Embedding model: {config.PATHWAY.EMBEDDING_MODEL}")

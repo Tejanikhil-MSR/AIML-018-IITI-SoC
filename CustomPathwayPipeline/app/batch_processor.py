@@ -4,7 +4,7 @@ import time
 import asyncio
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.memory import ConversationBufferMemory
-
+from typing import Any
 
 request_queue = queue.Queue()
 response_futures = {}  # id -> asyncio.Future
@@ -14,7 +14,7 @@ class BatchProcessor:
     Manages the batching of LLM inference requests and updates user memories.
     Made generic to accept batching configurations and an LLM generator instance.
     """
-    def __init__(self, llm_generator: any, max_batch_size: int, batch_timeout_seconds: float):
+    def __init__(self, llm_generator: Any, max_batch_size: int, batch_timeout_seconds: float):
         """
         Initializes the BatchProcessor.
 
@@ -73,10 +73,8 @@ class BatchProcessor:
 
             for item in batch:
                 prompts_to_process.append(item['formatted_prompt'])
-                # Reconstruct ConversationBufferMemory for each item in the batch
-                # This part is specific to Langchain's ConversationBufferMemory and message types,
-                # but it's a common pattern for handling chat history in RAG applications.
                 current_memory = ConversationBufferMemory(return_messages=True)
+
                 for msg_data in item['initial_chat_messages']:
                     if msg_data['type'] == 'human':
                         current_memory.chat_memory.add_message(HumanMessage(content=msg_data['content']))
@@ -90,11 +88,12 @@ class BatchProcessor:
                     'request_id': item['request_id'],
                     'user_memory_instance': current_memory,
                     'initial_user_message': item['user_message'],
-                    # 'keywords': item["keywords"] # Keywords are application-specific metadata, not needed by generic batch processor
+                    'keywords': item["keywords"] # Keywords are application-specific metadata, not needed by generic batch processor
                 })
 
             # --- Perform actual LLM generation using the injected generator ---
             try:
+
                 batch_responses = self.llm_generator.generate_batched_responses(prompts_to_process)
 
                 for i, response_text in enumerate(batch_responses):
@@ -103,7 +102,7 @@ class BatchProcessor:
                     user_memory_instance = req_data['user_memory_instance']
 
                     # Add the AI's generated response to the memory
-                    user_memory_instance.chat_memory.add_message(AIMessage(content=response_text))
+                    user_memory_instance.chat_memory.add_message(AIMessage(content="Response Keywords : " + req_data["keywords"]))
                     print(f" [Batch] Updated memory for request_id: {req_id}")
 
                     # Serialize messages back for storage (e.g., in Flask session)
@@ -112,7 +111,7 @@ class BatchProcessor:
                         if isinstance(msg, HumanMessage):
                             serializable_messages.append({'type': 'human', 'content': msg.content})
                         elif isinstance(msg, AIMessage):
-                            serializable_messages.append({'type': 'ai', 'content': msg.content})
+                            serializable_messages.append({'type': 'ai', 'content': "Response Keywords : " + req_data["keywords"]})
 
                     if req_id in response_futures:
                         response_futures[req_id].set_result({

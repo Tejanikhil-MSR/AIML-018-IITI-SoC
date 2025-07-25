@@ -1,8 +1,12 @@
 import re
 from pathlib import Path
 from typing import List, Optional
-from config import config
+import sys
 import os
+
+sys.path.append("../")
+
+from CustomPathwayPipeline.config import config
 
 class LogParser:
     def __init__(self):
@@ -23,7 +27,8 @@ class LogParser:
         with log_file_path.open('r') as file:
             for line in file:
                 if "Files retrieved" in line:
-                    match = re.search(r'Files retrieved\s*:\s*\[(.*?)\]', line)
+                    # line = "Files retrieved : link1 </> link2 </> link3"
+                    match = re.search(r'Files retrieved\s*:\s*(.+)', line)
                     if match:
                         links_raw = match.group(1)
                         links = [link.strip() for link in links_raw.split(',')]
@@ -31,7 +36,7 @@ class LogParser:
 
         return list(set(retrieved_links))  # Remove duplicates
     
-    def _convert_into_link(filename: str) -> str:
+    def _convert_into_link(self, filename: str) -> str:
         regenerated_link = filename
         return regenerated_link
 
@@ -40,10 +45,12 @@ class LogParser:
         links = []
 
         log_file_path = os.path.join(config.DATA.LOG_DIR, "info.log")
-        if not log_file_path.exists():
+        log_file = Path(log_file_path)
+
+        if not log_file.exists():
             raise FileNotFoundError(f"No log file found at: {log_file_path}")
 
-        retrieved_filepaths = self._parse_log_file(log_file_path)
+        retrieved_filepaths = self._parse_log_file(log_file)
         
         for file_path in retrieved_filepaths:
             links.append(self._convert_into_link(file_path))

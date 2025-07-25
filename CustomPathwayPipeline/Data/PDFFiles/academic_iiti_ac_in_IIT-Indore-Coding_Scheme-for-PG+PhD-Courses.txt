@@ -1,9 +1,0 @@
---- Summary for academic_iiti_ac_in_IIT-Indore-Coding_Scheme-for-PG+PhD-Courses.pdf ---
-
- The Indian Institute of Technology Indore has established a coding scheme for Postgraduate (PG) and Doctoral (PhD) courses across three schools: School of Engineering, School of Humanities and Social Sciences (HSS), and School of Science. Each PG course is assigned a 5-6 digit alpha-numeric code with the first three digits representing the discipline code.
-
-1. **School of Engineering:** Offers PG and PhD courses in Electrical Engineering (EE) and Mechanical Engineering (ME). The coding scheme includes thesis and seminar courses for both postgraduate and doctoral levels.
-2. **School of HSS:** Provides PG and PhD courses in Philosophy, Economics, English and Foreign Languages, Psychology, and Sociology, with a similar course coding structure to the School of Engineering.
-3. **School of Science:** Offers PG and PhD courses but does not have detailed information provided about its course coding scheme.
-
-In addition, the content outlines the course coding scheme for Chemistry, Mathematics, and Physics across various areas of specialization at the PG/PhD level. For example, in Chemistry, there are four main areas: Physical, Organic, Inorganic, and Analytical. In Physics, there are ten main areas, including Classical mechanics and Quantum mechanics. The coding scheme includes thesis and seminar courses for both postgraduate and doctoral levels.

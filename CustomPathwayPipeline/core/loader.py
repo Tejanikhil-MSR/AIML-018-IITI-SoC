@@ -1,4 +1,5 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers.utils.quantization_config import BitsAndBytesConfig
 import torch
 
 class LLMModelLoader:
@@ -17,12 +18,10 @@ class LLMModelLoader:
 
         self.tokenizer = self._load_tokenizer()
 
-        # Use provided quantization_config or default to BitsAndBytesConfig
         self.bnb_config = quantization_config
 
         self.model = self._load_model()
 
-        # Use provided generation_args or default, then add pad_token_id
         self.generation_args = generation_args.copy()
         self.generation_args["pad_token_id"] = self.tokenizer.eos_token_id
 
@@ -56,7 +55,7 @@ class LLMModelLoader:
         except Exception as e:
             print(f"CUDA not available or error loading to {self.current_device}: {e}. Falling back to CPU.")
             model = AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code=True).to("cpu")
-            self.current_device = "cpu" # Update device to reflect actual loaded device
+            self.current_device = "cpu"
 
         model.config.pad_token_id = model.config.eos_token_id
         model.eval() # Set model to evaluation mode
@@ -84,25 +83,20 @@ class LLMModelLoader:
 
         decoded_responses = []
         for output in outputs:
-            # Decode the full output and extract only the generated response
             decoded = self.tokenizer.decode(output, skip_special_tokens=False)
-            # Assuming a conversation template like "[INST] prompt [/INST] response"
-            # Adjust splitting logic if your prompt template is different
             response_text = decoded.split("[/INST]")[-1].strip()
             decoded_responses.append(response_text)
 
         print(f" [Batch] Finished processing batch.")
         return decoded_responses
 
-# Example of how to use it with default settings (similar to original usage)
 # llm_model_loader = LLMModelLoader()
 
-# Example of how to use it with custom settings
 # from transformers import BitsAndBytesConfig
 # custom_bnb_config = BitsAndBytesConfig(load_in_8bit=True)
 # custom_generation_args = {"max_new_tokens": 100, "temperature": 0.5}
 # custom_loader = LLMModelLoader(
-#     model_name="google/flan-t5-small", # Example: A different model
+#     model_name="google/flan-t5-small",
 #     device="cpu", # Example: Force CPU
 #     generation_args=custom_generation_args,
 #     quantization_config=custom_bnb_config

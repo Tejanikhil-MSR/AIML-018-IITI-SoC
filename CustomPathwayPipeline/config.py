@@ -113,22 +113,30 @@ You are a AI bot responding to the user for the question - {{question}} given th
 class ConversationalConfig:
     """Configuration for conversational elements."""
     GREETING_LABELS: list = field(default_factory=lambda: [
-        "hi", "hello", "hey", "greetings", "good morning", "good evening", "good afternoon"
+        "hi", "hello", "hey", "greetings", "good morning", "good evening", "good afternoon",
+        "who are you ?", "what is your name ?", "introduce yourself", "tell me about yourself",
+        "what can you do ?", "how can you help me ?", "what is your purpose ?", "what are you capable of ?",
+        "what is your function ?", "what is your objective ?"
     ])
+
     SEND_OFF_LABELS: list = field(default_factory=lambda: [
         "thank", "thanks", "bye", "goodbye"
     ])
+    
     GREETING_RESPONSES: list = field(default_factory=lambda: [
         "Hello! How can I assist you today regarding IIT Indore?",
         "Hi there! What would you like to know about the college?",
         "Greetings! I'm here to help with your IIT Indore questions.",
         "Hey! Ask me anything about IIT Indore.",
+        "Hey! I'm here to provide information about IIT Indore. What's on your mind?",
         "Welcome! How can I guide you about the campus?"
     ])
-    CONVERSATIONAL_RESPONSES: list = field(default_factory=lambda: [
+
+    SEND_OFF_RESPONSES: list = field(default_factory=lambda: [
         "You're welcome! Feel free to ask if you have more questions.",
-        "My pleasure! I'm an AI assistant for IIT Indore. How can I help?",
-        "I'm here to provide information about IIT Indore. What's on your mind?",
+        "My pleasure!",
+        "Glad to help! If you need more info, just let me know.",
+        "Anytime! I'm here if you have more queries.",
         "It was nice chatting with you! Is there anything else about IIT Indore I can assist with?"
     ])
     INTENTS: list = field(default_factory=lambda: [

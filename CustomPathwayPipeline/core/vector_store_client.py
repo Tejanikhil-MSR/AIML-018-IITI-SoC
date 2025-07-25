@@ -44,13 +44,13 @@ class PathwayRetriever:
             formatted_context.append(doc.page_content)
             # Accessing 'filename' from metadata as per your Pathway server setup
             reference_links.append(doc.metadata["filename"])
-            keywords.append(doc._metadata["keywords"])
+            keywords.append(doc.metadata["keywords"])
 
-        print(formatted_context, reference_links, keywords)  # Debugging output to check retrieved links and keywords
+        # print(formatted_context, reference_links, keywords)  # Debugging output to check retrieved links and keywords
 
         return {
             "context": "\n\n".join(formatted_context),
-            "reference_links": "\n".join(reference_links),
+            "reference_links": " </> ".join(reference_links),
             "keywords": "<doc>".join(keywords),
         }
 

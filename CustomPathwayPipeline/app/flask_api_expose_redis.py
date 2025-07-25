@@ -1,13 +1,16 @@
 from flask import Flask, request, jsonify, session
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import HumanMessage, AIMessage
-from transformers import BitsAndBytesConfig
+from transformers.utils.quantization_config import BitsAndBytesConfig
 import torch
 import uuid
 import asyncio
 import random
 import logging
 import sys
+import redis
+from datetime import timedelta
+from flask_session import Session # for server side in-memory storage
 
 sys.path.append("../")
 
@@ -19,7 +22,15 @@ from CustomPathwayPipeline.app import BatchProcessor # type: ignore
 logging.basicConfig(filename=config.DATA.INFO_LOGGING, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.secret_key = config.FLASK_APP.SECRET_KEY
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = redis.Redis(host='localhost', port=6379, db=0)
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True  # Optional: adds security
+app.config['SESSION_KEY_PREFIX'] = 'rag_session:'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+
+# Initialize session with app
+Session(app)
 
 ###### Initializing Module #######
 
@@ -93,7 +104,7 @@ def handle_direct_response(user_query: str, user_memory: ConversationBufferMemor
     if any(keyword in query_lower for keyword in config.CONVERSATION.GREETING_LABELS):
         response = random.choice(config.CONVERSATION.GREETING_RESPONSES)
     elif any(keyword in query_lower for keyword in config.CONVERSATION.SEND_OFF_LABELS):
-        response = random.choice(config.CONVERSATION.CONVERSATIONAL_RESPONSES)
+        response = random.choice(config.CONVERSATION.SEND_OFF_RESPONSES)
     else:
         # Fallback if no specific greeting/send-off, can also be customized in config
         response = random.choice(config.CONVERSATION.GREETING_RESPONSES) # Re-use greeting responses for generic hello
@@ -107,8 +118,8 @@ def handle_direct_response(user_query: str, user_memory: ConversationBufferMemor
 @app.route("/", methods=["POST"])
 def chat():
     data = request.json
-    user_message = data.get("messages", "")
-    selected_label = data.get("selected_label")
+    user_message = data.get("messages", "") # type: ignore
+    selected_label = data.get("selected_label") # type: ignore
     
     if not user_message:
         return jsonify({"error": "Missing 'messages' field"}), 400
@@ -117,6 +128,7 @@ def chat():
     user_memory = get_user_memory()
     
     if selected_label:
+
         original_message = session.pop('original_user_message', user_message)
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
@@ -148,25 +160,22 @@ def chat():
         return jsonify({"request_id": request_id, "status": "processing_with_label", "label": selected_label}), 202
 
     else:
-        # Phase 1: Initial query, classify and ask for user intent
-        # query_classifier now uses its own internal map or a map passed during init
+
         probable_labels = query_classifier.classify_query(user_message)
         
         if not probable_labels:
-            # Default if no specific labels found - this is handled by QueryClassifier's default_label
-            # but can be kept as a safeguard or for custom logic
             probable_labels = ["General Info"]
             
-        session['original_user_message'] = user_message
+        session['original_user_message'] = user_message # Store original message for later use for the current session
 
-        return jsonify({
+        return jsonify({ # as an acknwloedgement message
                         "status": "label_selection_needed",
                         "message": "Please select the most relevant category for your query:",
                         "query": user_message,
                         "probable_labels": probable_labels
                        }), 200
 
-@app.route("/status/<request_id>", methods=["GET"])
+@app.route("/status/<request_id>", methods=["GET"]) # providing the cookie here
 def get_status(request_id):
     status, result_data = batch_processor.get_future_result(request_id)
     
@@ -186,9 +195,7 @@ def get_status(request_id):
 
 @app.route("/")
 def index():
-    # Access MODEL_CHOICE from the new config structure
     return f"RAG Chatbot is live using model: {config.MODEL.MODEL_CHOICE}"
 
 if __name__ == "__main__":
-    # Access Flask app host and port from the new config structure
     app.run(host=config.FLASK_APP.HOST, port=config.FLASK_APP.PORT, debug=True)

@@ -41,7 +41,7 @@ with st.container():
 # --- Input Field and Send Button / Label Selection ---
 
 # Check if we are waiting for a label selection
-if st.session_state.waiting_for_label:
+if st.session_state.waiting_for_label and st.session_state.probable_labels:
     st.write("Please select the most relevant category for your query:")
     cols = st.columns(len(st.session_state.probable_labels)) # Create columns for buttons
     
