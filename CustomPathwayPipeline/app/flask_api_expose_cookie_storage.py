@@ -122,10 +122,8 @@ def chat():
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
-        # rag_builder.get_formatted_prompt now returns prompt, links, and keywords
         formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
         
-        # Use logging with f-string for better formatting with multiple args
         logging.info(f"Files retrieved : {reference_links}")
         
         request_id = str(uuid.uuid4())
