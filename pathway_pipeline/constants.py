@@ -1,1 +1,0 @@
-#file to define the constand, like fall back msgs, # default values, etc.

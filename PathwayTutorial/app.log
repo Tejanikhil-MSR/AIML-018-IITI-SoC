@@ -1,0 +1,135 @@
+2025-07-09 01:59:40,678 - DEBUG - This is a debug message
+2025-07-09 01:59:40,685 - DEBUG - Using selector: EpollSelector
+2025-07-09 01:59:40,700 - DEBUG - Using selector: EpollSelector
+2025-07-09 01:59:40,704 - INFO - Preparing Pathway computation
+2025-07-09 01:59:40,706 - DEBUG - Telemetry disabled
+2025-07-09 01:59:40,706 - INFO - Enter read_snapshot method with reader PosixLike
+2025-07-09 01:59:40,707 - INFO - Enter read_snapshot method with reader Python
+2025-07-09 01:59:40,715 - INFO - FileSystem(Students.json): 0 entries (1 minibatch(es)) have been sent to the engine
+2025-07-09 01:59:40,715 - INFO - FileSystem(Students.json): 3 entries (2 minibatch(es)) have been sent to the engine
+2025-07-09 01:59:40,716 - WARNING - FileSystem(Students.json): Closing the data source
+2025-07-09 01:59:40,716 - INFO - PythonReader: 0 entries (1 minibatch(es)) have been sent to the engine
+2025-07-09 01:59:40,717 - INFO - subscribe-0: Done writing 0 entries, time 1752006580706. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 01:59:40,717 - INFO - subscribe-0: Done writing 0 entries, time 1752006580704. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 01:59:40,718 - INFO - ^6AV4ZBZ8ZM5YQHWQ09ADACRBHC, {'_metadata': pw.Json({'created_at': 1752005035, 'modified_at': 1752005515, 'owner': 'tejanikhil', 'path': 'Students.json', 'size': 126, 'seen_at': 1752006580}), 'id': 3, 'name': 'Charlie', 'score': 76.3}, 1752006580714, True
+2025-07-09 01:59:40,718 - INFO - ^QAXBAG2ZP4B2K3G5V9Q6FZVFRW, {'_metadata': pw.Json({'created_at': 1752005035, 'modified_at': 1752005515, 'owner': 'tejanikhil', 'path': 'Students.json', 'size': 126, 'seen_at': 1752006580}), 'id': 2, 'name': 'Bob', 'score': 92.0}, 1752006580714, True
+2025-07-09 01:59:40,719 - INFO - ^GNFKMMNPM7JHFJSFT9SXM6SWZR, {'_metadata': pw.Json({'created_at': 1752005035, 'modified_at': 1752005515, 'owner': 'tejanikhil', 'path': 'Students.json', 'size': 126, 'seen_at': 1752006580}), 'id': 1, 'name': 'Alice', 'score': 85.5}, 1752006580714, True
+2025-07-09 01:59:40,719 - INFO - subscribe-0: Done writing 3 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 01:59:55,954 - INFO - 127.0.0.1 [09/Jul/2025:01:59:55 +0530] "GET /uppercase HTTP/1.1" 405 206 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+2025-07-09 01:59:56,066 - INFO - 127.0.0.1 [09/Jul/2025:01:59:56 +0530] "GET /favicon.ico HTTP/1.1" 404 175 "http://127.0.0.1:9999/uppercase" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+2025-07-02025-07-09 02:23:20,673 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:23:20,674 - INFO - Preparing Pathway computation
+2025-07-09 02:23:20,674 - DEBUG - Telemetry disabled
+2025-07-09 02:23:20,785 - INFO - subscribe-0: Done writing 3 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:29:12,620 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:29:12,621 - INFO - Preparing Pathway computation
+2025-07-09 02:29:12,621 - DEBUG - Telemetry disabled
+2025-07-09 02:29:12,627 - INFO - subscribe-0: Done writing 3 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:29:28,243 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:29:28,244 - INFO - Preparing Pathway computation
+2025-07-09 02:29:28,246 - DEBUG - Telemetry disabled
+2025-07-09 02:29:28,248 - INFO - subscribe-0: Done writing 3 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:43:45,325 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:43:45,326 - INFO - Preparing Pathway computation
+2025-07-09 02:43:45,327 - DEBUG - Telemetry disabled
+2025-07-09 02:43:45,329 - INFO - subscribe-0: Done writing 0 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:44:19,244 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:44:19,245 - INFO - Preparing Pathway computation
+2025-07-09 02:44:19,248 - DEBUG - Telemetry disabled
+2025-07-09 02:44:19,250 - INFO - subscribe-0: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:44:37,303 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:44:37,303 - INFO - Preparing Pathway computation
+2025-07-09 02:44:37,305 - DEBUG - Telemetry disabled
+2025-07-09 02:44:37,306 - INFO - subscribe-0: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:45:36,959 - DEBUG - Using selector: EpollSelector
+2025-07-09 02:45:36,960 - INFO - Preparing Pathway computation
+2025-07-09 02:45:36,961 - DEBUG - Telemetry disabled
+2025-07-09 02:45:36,963 - INFO - subscribe-0: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:01:10,491 - DEBUG - Using selector: EpollSelector
+2025-07-09 03:01:10,554 - DEBUG - Using selector: EpollSelector
+2025-07-09 03:01:10,555 - INFO - Preparing Pathway computation
+2025-07-09 03:01:10,556 - DEBUG - Telemetry disabled
+2025-07-09 03:01:10,560 - INFO - Enter read_snapshot method with reader Python
+2025-07-09 03:01:10,561 - INFO - PythonReader: 0 entries (1 minibatch(es)) have been sent to the engine
+2025-07-09 03:01:10,562 - INFO - subscribe-1: Done writing 2 entries, time 1752010270560. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:01:10,563 - INFO - subscribe-1: Done writing 0 entries, time 1752010270560. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:01:10,663 - INFO - PythonReader: 2 entries (6 minibatch(es)) have been sent to the engine
+2025-07-09 03:01:10,664 - WARNING - PythonReader: Closing the data source
+2025-07-09 03:01:10,664 - INFO - subscribe-1: Done writing 0 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:01:10,664 - INFO - subscribe-1: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:04:52,412 - DEBUG - Using selector: EpollSelector
+2025-07-09 03:04:52,412 - INFO - Preparing Pathway computation
+2025-07-09 03:04:52,413 - DEBUG - Telemetry disabled
+2025-07-09 03:04:52,417 - INFO - subscribe-0: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 03:05:12,129 - DEBUG - Using selector: EpollSelector
+2025-07-09 03:05:12,129 - INFO - Preparing Pathway computation
+2025-07-09 03:05:12,129 - DEBUG - Telemetry disabled
+2025-07-09 03:05:12,134 - INFO - subscribe-0: Done writing 2 entries, closing data sink. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+723 - INFO - 127.0.0.1 [09/Jul/2025:02:01:30 +0530] "POST /uppercase HTTP/1.1" 200 165 "-" "curl/7.68.0"
+2025-07-09 02:01:36,205 - INFO - PythonReader: 2 entries (4 minibatch(es)) have been sent to the engine
+2025-07-09 02:01:36,206 - INFO - subscribe-0: Done writing 2 entries, time 1752006696204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:01:42,205 - INFO - PythonReader: 0 entries (4 minibatch(es)) have been sent to the engine
+2025-07-09 02:01:42,206 - INFO - subscribe-0: Done writing 0 entries, time 1752006702204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:01:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006708204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:01:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006714204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006720204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006726204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006732204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006738204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006744204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:30,209 - INFO - subscribe-0: Done writing 0 entries, time 1752006750204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006756204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006762204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006768204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:02:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006774204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006780204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006786204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006792204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006798204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006804204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:30,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006810204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006816204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006822204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006828204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:03:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006834204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006840204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006846204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006852204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006858204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006864204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:30,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006870204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006876204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006882204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006888204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:04:54,212 - INFO - subscribe-0: Done writing 0 entries, time 1752006894204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006900204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006906204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006912204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006918204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006924204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:30,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006930204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006936204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006942204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006948204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:05:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006954204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006960204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006966204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006972204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006978204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006984204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:30,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006990204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752006996204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007002204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007008204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:06:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007014204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007020204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:06,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007026204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:12,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007032204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:18,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007038204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:24,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007044204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:30,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007050204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:36,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007056204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:42,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007062204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:48,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007068204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:07:54,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007074204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
+2025-07-09 02:08:00,205 - INFO - subscribe-0: Done writing 0 entries, time 1752007080204. Current batch writes took: 0 ms. All writes so far took: 0 ms.
