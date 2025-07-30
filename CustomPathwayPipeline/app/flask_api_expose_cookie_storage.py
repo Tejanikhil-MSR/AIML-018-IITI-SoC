@@ -115,7 +115,9 @@ def chat():
     
     # Get memory based on current session
     user_memory = get_user_memory()
-    
+
+    query_lower = user_message.lower()
+
     if selected_label:
 
         original_message = session.pop('original_user_message', user_message)
@@ -146,23 +148,47 @@ def chat():
         
         return jsonify({"request_id": request_id, "status": "processing_with_label", "label": selected_label}), 202
 
-    else:
+    else: # Query is not a greeting/send-off and not yet classified
+
+        # Check for direct conversational responses (greetings/send-offs) first
+        if any(keyword in query_lower for keyword in config.CONVERSATION.GREETING_LABELS) or \
+            any(keyword in query_lower for keyword in config.CONVERSATION.SEND_OFF_LABELS):
+            
+            response = handle_direct_response(user_message, user_memory) # Use the existing handler
+            return jsonify({"status": "completed", "response": response}), 200 # Directly return response
+        
 
         probable_labels = query_classifier.classify_query(user_message)
         
+        # its a general query (i.e) none of the intents defined
         if not probable_labels:
-            probable_labels = ["General Info"]
+            # If no probable labels are found, automatically set to "General Info" and proceed directly to RAG without prompting the user for label selection.
+            session['original_user_message'] = user_message # Store original message for consistency
+            formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(user_message, user_memory, label="General Info")
+
+            logging.info(f"Files retrieved : {reference_links}")
             
-        session['original_user_message'] = user_message # Store original message for later use for the current session
+            request_id = str(uuid.uuid4())
 
-        return jsonify({ # as an acknwloedgement message
-                        "status": "label_selection_needed",
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+            future = loop.create_future()
+            
+            batch_processor.add_request_to_queue({'request_id': request_id, 'formatted_prompt': formatted_prompt,
+                'initial_chat_messages': session['chat_messages'], 'user_message': user_message, 'keywords': keywords
+            }, future)
+            
+            return jsonify({"request_id": request_id, "status": "processing_with_label", "label": "General Info"}), 202
+
+        return jsonify({"status": "label_selection_needed", 
                         "message": "Please select the most relevant category for your query:",
-                        "query": user_message,
-                        "probable_labels": probable_labels
-                       }), 200
+                        "query": user_message, "probable_labels": probable_labels}), 200
 
-@app.route("/status/<request_id>", methods=["GET"]) # providing the cookie here
+@app.route("/status/<request_id>", methods=["GET"])
 def get_status(request_id):
     status, result_data = batch_processor.get_future_result(request_id)
     

@@ -16,10 +16,8 @@ render_styles()
 render_header()
 init_chat_history()
 
-# --- Display Chat Messages ---
-# Use a placeholder for the chat history container
 chat_history_container = st.container()
-
+# for displaying the previous chat history
 with st.container():
     st.markdown("### 💬 Chat History")
     for sender, msg in get_chat_history():
@@ -38,10 +36,8 @@ with st.container():
                 unsafe_allow_html=True
             ) # Bot message bubble (muted brown)
             
-# --- Input Field and Send Button / Label Selection ---
-
 # Check if we are waiting for a label selection
-if st.session_state.waiting_for_label and st.session_state.probable_labels:
+if st.session_state.waiting_for_label:
     st.write("Please select the most relevant category for your query:")
     cols = st.columns(len(st.session_state.probable_labels)) # Create columns for buttons
     
@@ -66,13 +62,10 @@ if st.session_state.waiting_for_label and st.session_state.probable_labels:
                     st.error("Error initiating RAG processing after label selection.")
                     st.session_state.request_id = None # Clear request_id on error
 
-else: # Not waiting for label, show normal chat input
+else: # show normal chat input
     user_input = st.text_input("Type your message here:", key="user_input_text")
     if st.button("Send", key="send_button") and user_input.strip():
-        # Add user query to chat history immediately for display
         add_message("user", user_input.strip())
-        
-        # Trigger the backend communication orchestration
         get_bot_response_orchestrator(user_input.strip())
         
         # Clear the input box visually after sending
@@ -80,7 +73,7 @@ else: # Not waiting for label, show normal chat input
         st.rerun() # Rerun to clear input and display user message
 
 # --- Polling for Response (if a request is in progress) ---
-if st.session_state.request_id:
+if st.session.current_status!="completed" and st.session_state.request_id:
     # Display "Thinking..." message while waiting for backend
     with chat_history_container: # Display inside the chat history area
         st.markdown(
@@ -107,3 +100,12 @@ if st.session_state.request_id:
             # Still processing, wait a bit and rerun
             time.sleep(POLLING_INTERVAL_SECONDS)
             st.rerun() # Keep rerunning until completed or error
+
+if st.session.current_status=="completed": # its a greeting response
+    status_data = st.session_state.response
+    st.session.current_status=""
+    if status_data:
+        add_message("bot", status_data) # Add bot's final response to history
+        st.session_state.response = None # Clear response after displaying
+        st.rerun() # rerun to display the response
+    
