@@ -1,23 +1,26 @@
 import sys
 import os
 import streamlit as st
-import time # For polling delay
+import time
 
 # Add components directory to Python path
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'components'))
 
 from components.layout import render_header, render_styles
-from components.chatbot import get_bot_response_orchestrator, send_query_to_backend, poll_backend_status, POLLING_INTERVAL_SECONDS
-from components.session import init_chat_history, add_message, get_chat_history, clear_chat_state
+from components.chatbot import get_bot_response_orchestrator, send_query_to_backend, poll_backend_status
+from components.session import init_session_variables, add_message, get_chat_history, clear_chat_state
+from frontend_config import POLLING_INTERVAL_SECONDS
 
-# --- Setup ---
+# === Setup ===
 st.set_page_config(page_title="College Chatbot", layout="centered")
 render_styles()
 render_header()
-init_chat_history()
+
+# === Step 1 : Initialize the chat history === 
+init_session_variables()
 
 chat_history_container = st.container()
-# for displaying the previous chat history
+
 with st.container():
     st.markdown("### 💬 Chat History")
     for sender, msg in get_chat_history():
@@ -35,8 +38,15 @@ with st.container():
                       margin-right: auto; text-align: left;'>{msg}</div>""",
                 unsafe_allow_html=True
             ) # Bot message bubble (muted brown)
-            
-# Check if we are waiting for a label selection
+
+def handle_send():
+    user_input = st.session_state.user_input_text.strip()
+    if user_input:
+        add_message("user", user_input)
+        get_bot_response_orchestrator(user_input)
+    
+# === Step 2 : Handle label selection ===
+# bot_orchestratator reruns the frontend interface states to ask for label selection
 if st.session_state.waiting_for_label:
     st.write("Please select the most relevant category for your query:")
     cols = st.columns(len(st.session_state.probable_labels)) # Create columns for buttons
@@ -63,17 +73,12 @@ if st.session_state.waiting_for_label:
                     st.session_state.request_id = None # Clear request_id on error
 
 else: # show normal chat input
-    user_input = st.text_input("Type your message here:", key="user_input_text")
+    user_input = st.text_input("Type your message here:", key="user_input_text", on_change=handle_send)
     if st.button("Send", key="send_button") and user_input.strip():
-        add_message("user", user_input.strip())
-        get_bot_response_orchestrator(user_input.strip())
-        
-        # Clear the input box visually after sending
-        st.session_state.user_input_text = "" 
-        st.rerun() # Rerun to clear input and display user message
+        handle_send()
 
 # --- Polling for Response (if a request is in progress) ---
-if st.session.current_status!="completed" and st.session_state.request_id:
+if st.session_state.request_id:  
     # Display "Thinking..." message while waiting for backend
     with chat_history_container: # Display inside the chat history area
         st.markdown(
@@ -101,11 +106,10 @@ if st.session.current_status!="completed" and st.session_state.request_id:
             time.sleep(POLLING_INTERVAL_SECONDS)
             st.rerun() # Keep rerunning until completed or error
 
-if st.session.current_status=="completed": # its a greeting response
+if st.session_state.current_status=="completed": # its a greeting response
     status_data = st.session_state.response
-    st.session.current_status=""
+    st.session_state.current_status = None
     if status_data:
         add_message("bot", status_data) # Add bot's final response to history
         st.session_state.response = None # Clear response after displaying
         st.rerun() # rerun to display the response
-    

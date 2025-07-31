@@ -143,7 +143,6 @@ class ConversationalConfig:
         "Admissions", "Academics", "Student Life", "Research", "Events"
     ])
 
-
 # Create a single global configuration object
 @dataclass
 class AppConfig:
@@ -160,8 +159,6 @@ class AppConfig:
 # This is the single point of access for all settings
 config = AppConfig()
 
-
-# Example usage in other files:
 # from config import config
 # model_choice = config.MODEL.MODEL_CHOICE
 # pathway_host = config.PATHWAY.HOST

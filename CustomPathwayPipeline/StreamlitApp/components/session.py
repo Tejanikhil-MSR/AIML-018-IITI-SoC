@@ -1,6 +1,6 @@
 import streamlit as st
 
-def init_chat_history():
+def init_session_variables():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     if "request_id" not in st.session_state:
@@ -11,6 +11,8 @@ def init_chat_history():
         st.session_state.original_query_for_label = None
     if "probable_labels" not in st.session_state:
         st.session_state.probable_labels = []
+    if "current_status" not in st.session_state:
+        st.session_state.current_status = None
 
 def add_message(sender, text):
     st.session_state.chat_history.append((sender, text))

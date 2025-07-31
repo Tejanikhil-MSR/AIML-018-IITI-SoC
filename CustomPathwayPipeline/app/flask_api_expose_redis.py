@@ -70,7 +70,7 @@ query_classifier = QueryClassifier()
 
 ###################################
 
-def get_user_memory() -> ConversationBufferMemory:
+def load_user_memory_to_buffer_memory() -> ConversationBufferMemory:
     """
         Retrieves or creates a ConversationBufferMemory for the current session.
         The actual messages are stored in the Flask session.
@@ -125,7 +125,7 @@ def chat():
         return jsonify({"error": "Missing 'messages' field"}), 400
     
     # Get memory based on current session
-    user_memory = get_user_memory()
+    user_memory = load_user_memory_to_buffer_memory()
     
     if selected_label:
 
@@ -133,8 +133,8 @@ def chat():
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
-        # rag_builder.get_formatted_prompt now returns prompt, links, and keywords
-        formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        # rag_builder.augment_prompt_with_context now returns prompt, links, and keywords
+        formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(original_message, user_memory, label=selected_label)
         
         # Use logging with f-string for better formatting with multiple args
         logging.info(f"Files retrieved : {reference_links}")

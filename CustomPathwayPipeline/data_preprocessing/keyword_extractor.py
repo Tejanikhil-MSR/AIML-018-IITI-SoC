@@ -23,13 +23,14 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
         List[str]: Final ranked keywords
     """
     stop_words = list(set(stopwords.words('english')))
-    lemmatizer = WordNetLemmatizer()
+    # lemmatizer = WordNetLemmatizer()
     kw_model = KeyBERT()
 
     # Preprocess function
     def preprocess(text):
         tokens = re.findall(r'\b\w{3,}\b', text.lower())
-        tokens = [lemmatizer.lemmatize(t) for t in tokens if t not in stop_words]
+        # tokens = [lemmatizer.lemmatize(t) for t in tokens if t not in stop_words]
+        tokens = [t for t in tokens if t not in stop_words]
         return ' '.join(tokens)
     
     preprocessed_text = preprocess(text_data)
@@ -41,7 +42,7 @@ def extract_keywords_from_string(text_data: str, n_keywords: int = 15):
     )
     tfidf_matrix = vectorizer.fit_transform([preprocessed_text])
     feature_names = vectorizer.get_feature_names_out()
-    tfidf_scores = tfidf_matrix.todense().toarray().flatten()
+    tfidf_scores = tfidf_matrix.toarray().flatten() # type: ignore
     tfidf_top_indices = np.argsort(tfidf_scores)[-n_keywords*2:][::-1]
     tfidf_keywords = [feature_names[i] for i in tfidf_top_indices if tfidf_scores[i] > 0]
 

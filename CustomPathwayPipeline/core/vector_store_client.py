@@ -51,7 +51,7 @@ class PathwayRetriever:
         return {
             "context": "\n\n".join(formatted_context),
             "reference_links": " </> ".join(reference_links),
-            "keywords": "<doc>".join(keywords),
+            "keywords_concat": "\n".join(keywords),
         }
 
     def get_context_and_links(self, query: str) -> dict:

@@ -59,11 +59,11 @@ query_classifier = QueryClassifier()
 
 ###################################
 
-def get_user_memory() -> ConversationBufferMemory:
+def load_user_memory_to_buffer_memory() -> ConversationBufferMemory:
     """
-        Retrieves or creates a ConversationBufferMemory for the current session.
-        The actual messages are stored in the Flask session.
+        Load the session stored memory into the ConversationBufferMemory.
     """
+    
     if 'chat_messages' not in session:
         session['chat_messages'] = []
     
@@ -79,7 +79,10 @@ def get_user_memory() -> ConversationBufferMemory:
 
 def save_user_memory_to_session(memory_messages: list):
     """
-        Saves the provided serializable list of messages to the Flask session.
+        stores the new messages to the session variable.
+        Note : memory messages are in serialized format which means : 
+            HumanMessage(content="...") turns into {'type': 'human', 'content': '...'}
+            AIMessage(content="...") turns into {'type': 'ai', 'content': '...'}
     """
     session['chat_messages'] = memory_messages
 
@@ -98,13 +101,11 @@ def handle_direct_response(user_query: str, user_memory: ConversationBufferMemor
         # Fallback if no specific greeting/send-off, can also be customized in config
         response = random.choice(config.CONVERSATION.GREETING_RESPONSES) # Re-use greeting responses for generic hello
     
-    # Update the memory directly here since it's an immediate response
-    user_memory.chat_memory.add_message(AIMessage(content=response))
-    save_user_memory_to_session(user_memory.chat_memory.messages) # Save immediately
-    
+    # Donot add greeting/send-off messages to chat history
+
     return response
 
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["POST"]) # Backend Entrypoint : Will be called from the frontend
 def chat():
     data = request.json
     user_message = data.get("messages", "") # type: ignore
@@ -114,17 +115,18 @@ def chat():
         return jsonify({"error": "Missing 'messages' field"}), 400
     
     # Get memory based on current session
-    user_memory = get_user_memory()
+    user_memory = load_user_memory_to_buffer_memory()
 
     query_lower = user_message.lower()
 
+    # === If label is given the query is already classified - Send it for Document retrieval ===
     if selected_label:
 
         original_message = session.pop('original_user_message', user_message)
         
         user_memory.chat_memory.add_message(HumanMessage(content=original_message))
         
-        formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(original_message, user_memory, label=selected_label)
+        formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(original_message, user_memory, label=selected_label)
         
         logging.info(f"Files retrieved : {reference_links}")
         
@@ -142,32 +144,30 @@ def chat():
             'formatted_prompt': formatted_prompt,
             'initial_chat_messages': session['chat_messages'], # Pass current messages
             'user_message': original_message,
-            'keywords': keywords # Still pass keywords, though BatchProcessor might not use it generically
+            'keywords_concat': keywords # Still pass keywords, though BatchProcessor might not use it generically
             
         }, future)
         
         return jsonify({"request_id": request_id, "status": "processing_with_label", "label": selected_label}), 202
 
-    else: # Query is not a greeting/send-off and not yet classified
-
-        # Check for direct conversational responses (greetings/send-offs) first
-        if any(keyword in query_lower for keyword in config.CONVERSATION.GREETING_LABELS) or \
-            any(keyword in query_lower for keyword in config.CONVERSATION.SEND_OFF_LABELS):
-            
-            response = handle_direct_response(user_message, user_memory) # Use the existing handler
+    # === Query is not a greeting/send-off and not yet classified ===
+    else:
+        # === Step1 : Check if the query is a greeting or send-off ===
+        greetings = config.CONVERSATION.GREETING_LABELS
+        send_offs = config.CONVERSATION.SEND_OFF_LABELS
+        if any(keyword in query_lower for keyword in greetings + send_offs):
+            response = handle_direct_response(user_message, user_memory) 
             return jsonify({"status": "completed", "response": response}), 200 # Directly return response
-        
 
+        # === Step2 : If its a normal query then classify the query using QueryClassifier ===
         probable_labels = query_classifier.classify_query(user_message)
         
-        # its a general query (i.e) none of the intents defined
+        # === Step3.0 : If there is no label found, set to "General Info" and proceed directly to retrieval and generation step ===
         if not probable_labels:
-            # If no probable labels are found, automatically set to "General Info" and proceed directly to RAG without prompting the user for label selection.
             session['original_user_message'] = user_message # Store original message for consistency
-            formatted_prompt, reference_links, keywords = rag_builder.get_formatted_prompt(user_message, user_memory, label="General Info")
-
+            formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(user_message, user_memory, label="General Info")
             logging.info(f"Files retrieved : {reference_links}")
-            
+            # === Step 3.1 : Create a request id for the current request
             request_id = str(uuid.uuid4())
 
             try:
@@ -178,18 +178,24 @@ def chat():
                 
             future = loop.create_future()
             
-            batch_processor.add_request_to_queue({'request_id': request_id, 'formatted_prompt': formatted_prompt,
-                'initial_chat_messages': session['chat_messages'], 'user_message': user_message, 'keywords': keywords
+            batch_processor.add_request_to_queue({
+                'request_id': request_id, 
+                'formatted_prompt': formatted_prompt, 
+                'initial_chat_messages': session['chat_messages'], 
+                'user_message': user_message, 
+                'keywords_concat': keywords
             }, future)
             
             return jsonify({"request_id": request_id, "status": "processing_with_label", "label": "General Info"}), 202
 
+        # === Step4 : If probable labels are found, ask user to select one ===
         return jsonify({"status": "label_selection_needed", 
                         "message": "Please select the most relevant category for your query:",
                         "query": user_message, "probable_labels": probable_labels}), 200
 
 @app.route("/status/<request_id>", methods=["GET"])
 def get_status(request_id):
+
     status, result_data = batch_processor.get_future_result(request_id)
     
     if status == "completed":
@@ -201,9 +207,12 @@ def get_status(request_id):
             print(f" [App] Saved updated memory for session.")
 
         return jsonify({"status": status, "response": response}), 200
+    
     elif status == "error":
+        # result_data should be an error message string
         return jsonify({"status": status, "message": str(result_data)}), 500 # Ensure error message is string
     else:
+        # result_data will be None for the reqeusts being processed
         return jsonify({"status": status, "message": result_data if result_data else "Processing..."}), 200
 
 @app.route("/")
