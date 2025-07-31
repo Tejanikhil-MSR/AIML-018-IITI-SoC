@@ -105,6 +105,18 @@ def handle_direct_response(user_query: str, user_memory: ConversationBufferMemor
 
     return response
 
+def load_multi_hop_queries(k:int)->str:
+    """
+    Load the last k user requests from the session for multi-hop queries.
+    """
+    if 'chat_messages' not in session or len(session['chat_messages']) < k:
+        return ""
+    
+    # Get the last k messages, filtering out AI messages
+    multi_hop_queries = [msg['content'] for msg in session['chat_messages'][-k:] if msg['type'] == 'human']
+    
+    return ' <br> '.join(multi_hop_queries)
+
 @app.route("/", methods=["POST"]) # Backend Entrypoint : Will be called from the frontend
 def chat():
     data = request.json
@@ -117,20 +129,22 @@ def chat():
     # Get memory based on current session
     user_memory = load_user_memory_to_buffer_memory()
 
-    query_lower = user_message.lower()
+    query_lower = user_message.lower().strip()
 
     # === If label is given the query is already classified - Send it for Document retrieval ===
     if selected_label:
 
-        original_message = session.pop('original_user_message', user_message)
+        user_memory.chat_memory.add_message(HumanMessage(content="Previous request : " + user_message))
+        multi_hop_user_requests = load_multi_hop_queries(2) + " <br> " + user_message
+        formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(multi_hop_user_requests, user_memory, label=selected_label)
         
-        user_memory.chat_memory.add_message(HumanMessage(content=original_message))
-        
-        formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(original_message, user_memory, label=selected_label)
-        
+        logging.info(f"Prompt to the LLM for generations : {formatted_prompt}")
+        logging.info(f"Keywords extracted from the documents : {keywords}")
+
         logging.info(f"Files retrieved : {reference_links}")
         
         request_id = str(uuid.uuid4())
+
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -143,9 +157,8 @@ def chat():
             'request_id': request_id,
             'formatted_prompt': formatted_prompt,
             'initial_chat_messages': session['chat_messages'], # Pass current messages
-            'user_message': original_message,
-            'keywords_concat': keywords # Still pass keywords, though BatchProcessor might not use it generically
-            
+            'user_message': user_message,
+            'keywords': keywords, # Still pass keywords, though BatchProcessor might not use it generically
         }, future)
         
         return jsonify({"request_id": request_id, "status": "processing_with_label", "label": selected_label}), 202
@@ -155,18 +168,25 @@ def chat():
         # === Step1 : Check if the query is a greeting or send-off ===
         greetings = config.CONVERSATION.GREETING_LABELS
         send_offs = config.CONVERSATION.SEND_OFF_LABELS
-        if any(keyword in query_lower for keyword in greetings + send_offs):
+
+        if query_lower in [g.lower().strip() for g in greetings + send_offs]:
             response = handle_direct_response(user_message, user_memory) 
-            return jsonify({"status": "completed", "response": response}), 200 # Directly return response
+            return jsonify({"status": "completed", "response": response}), 200
+
 
         # === Step2 : If its a normal query then classify the query using QueryClassifier ===
         probable_labels = query_classifier.classify_query(user_message)
         
         # === Step3.0 : If there is no label found, set to "General Info" and proceed directly to retrieval and generation step ===
         if not probable_labels:
-            session['original_user_message'] = user_message # Store original message for consistency
+
             formatted_prompt, reference_links, keywords = rag_builder.augment_prompt_with_context(user_message, user_memory, label="General Info")
+            user_memory.chat_memory.add_message(HumanMessage(content="Previous request : " + user_message))
             logging.info(f"Files retrieved : {reference_links}")
+
+            logging.info(f"Prompt to the LLM for generations : {formatted_prompt}")
+            logging.info(f"Keywords extracted from the documents : {keywords}")
+
             # === Step 3.1 : Create a request id for the current request
             request_id = str(uuid.uuid4())
 
@@ -183,7 +203,7 @@ def chat():
                 'formatted_prompt': formatted_prompt, 
                 'initial_chat_messages': session['chat_messages'], 
                 'user_message': user_message, 
-                'keywords_concat': keywords
+                'keywords': keywords
             }, future)
             
             return jsonify({"request_id": request_id, "status": "processing_with_label", "label": "General Info"}), 202
@@ -196,6 +216,7 @@ def chat():
 @app.route("/status/<request_id>", methods=["GET"])
 def get_status(request_id):
 
+    print(request_id)
     status, result_data = batch_processor.get_future_result(request_id)
     
     if status == "completed":
@@ -211,6 +232,7 @@ def get_status(request_id):
     elif status == "error":
         # result_data should be an error message string
         return jsonify({"status": status, "message": str(result_data)}), 500 # Ensure error message is string
+    
     else:
         # result_data will be None for the reqeusts being processed
         return jsonify({"status": status, "message": result_data if result_data else "Processing..."}), 200
@@ -220,4 +242,4 @@ def index():
     return f"RAG Chatbot is live using model: {config.MODEL.MODEL_CHOICE}"
 
 if __name__ == "__main__":
-    app.run(host=config.FLASK_APP.HOST, port=config.FLASK_APP.PORT, debug=True)
+    app.run(host=config.FLASK_APP.HOST, port=config.FLASK_APP.PORT, debug=False)

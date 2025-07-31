@@ -4,7 +4,23 @@ from CustomPathwayPipeline.data_preprocessing import extract_keywords_from_strin
 from CustomPathwayPipeline.config import config
 import asyncio
 import time
+from langchain.text_splitter import TextSplitter
+
 logging.basicConfig(filename=config.DATA.DEBUGGER_LOGGING, filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class LineTextSplitter(TextSplitter):
+    def __init__(self, lines_per_chunk: int = 50, overlap: int = 0):
+        super().__init__()
+        self.lines_per_chunk = lines_per_chunk
+        self.overlap = overlap
+
+    def split_text(self, text: str) -> list[str]:
+        lines = text.splitlines()
+        chunks = []
+        for i in range(0, len(lines), self.lines_per_chunk - self.overlap):
+            chunk = "\n".join(lines[i:i + self.lines_per_chunk])
+            chunks.append(chunk)
+        return chunks
 
 def detect_type(file_path) -> str:
     clean_file_path = str(file_path).strip('\"')

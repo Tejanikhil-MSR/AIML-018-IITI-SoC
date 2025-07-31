@@ -4,7 +4,6 @@ sys.path.append("../")
 import pathway as pw
 from pathway.xpacks.llm.vector_store import VectorStoreServer
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.chat_models import ChatOllama
 from CustomPathwayPipeline.config import config
 from CustomPathwayPipeline.data_preprocessing import PDFSummarizer, extract_keywords_from_string
@@ -14,11 +13,13 @@ import asyncio
 import logging
 logging.basicConfig(filename=config.DATA.DEBUGGER_LOGGING, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-from helpers import detect_type, pre_process_text, async_summarize_pdf
+from helpers import detect_type, pre_process_text, async_summarize_pdf, LineTextSplitter
 
 # ==== initialize the required modules === 
 model = ChatOllama(model=config.MODEL.MODEL_CHOICE, temperature=0.3)
 summarizer_service = PDFSummarizer(model=model, summarize_prompt_template=config.PROMPTS.SUMMARIZATION_PROMPT, output_dir="PDFs_SUMMARIZED")
+
+from langchain.text_splitter import TextSplitter
 
 def server_init():
 
@@ -76,10 +77,9 @@ def server_init():
     embeddings = HuggingFaceEmbeddings(model_name=config.PATHWAY.EMBEDDING_MODEL,  model_kwargs = {'device': 'cpu'})
 
     # === 5 : Initialize a chunker to split the documents ===
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=150,
-        separators=["\n\n", "\n", ".", " ", ""]  # Prioritize paragraph/sentence boundaries
+    splitter = LineTextSplitter(
+        lines_per_chunk=50,
+        overlap=5,
     )
 
     # === 6 : Create the Vector Store Server ===

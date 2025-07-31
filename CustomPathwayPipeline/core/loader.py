@@ -25,7 +25,6 @@ class LLMModelLoader:
         self.generation_args = generation_args.copy()
         self.generation_args["pad_token_id"] = self.tokenizer.eos_token_id
 
-
     def _load_tokenizer(self):
         """
         Loads the tokenizer from the specified model name.
@@ -73,6 +72,8 @@ class LLMModelLoader:
         """
         if not self.model or not self.tokenizer:
             raise RuntimeError("Model or tokenizer not loaded. Call _load_model() and _load_tokenizer() first.")
+
+        print(prompts)
 
         print(f" [Batch] Processing batch of {len(prompts)} prompts...")
 

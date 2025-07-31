@@ -75,14 +75,15 @@ class BatchProcessor:
                 for msg_data in item['initial_chat_messages']:
                     if msg_data['type'] == 'human':
                         current_memory.chat_memory.add_message(HumanMessage(content=msg_data['content']))
-                    elif msg_data['type'] == 'ai':
-                        current_memory.chat_memory.add_message(AIMessage(content=msg_data['content']))
+                    # elif msg_data['type'] == 'ai':
+                        # current_memory.chat_memory.add_message(AIMessage(content=msg_data['content']))
 
-                # Add the current human message with label to the memory *before* the AI response is generated
-                current_memory.chat_memory.add_message(HumanMessage(content=item['user_message']))
                 # Instead of adding AI generated response to the chat_memory add the keywords from the retrieved documents
-                print(item)
-                current_memory.chat_memory.add_message(AIMessage(content="Response Keywords : " + item["keywords_concat"])) 
+                # concatenated_keywords = "\n".join(
+                #     [f"Doc-{i+1} Retrieved keywords : {', '.join(keywords)}" for i, keywords in enumerate(item['keywords'])]
+                # )
+
+                # current_memory.chat_memory.add_message(AIMessage(content="Previous Response Keywords : " + concatenated_keywords)) 
 
                 request_data_for_future.append({
                     'request_id': item['request_id'],
@@ -98,23 +99,19 @@ class BatchProcessor:
                     req_id = req_data['request_id']
                     user_memory_instance = req_data['user_memory_instance']
 
-                    # Add the AI's generated response to the memory
-                    # user_memory_instance.chat_memory.add_message(AIMessage(content="Response Keywords : " + req_data["keywords"]))
-                    # print(f" [Batch] Updated memory for request_id: {req_id}")
-
                     # === Step 4 : Serialize the messages for storage (in Flask session) ===
                     serializable_messages = []
                     for msg in user_memory_instance.chat_memory.messages:
                         if isinstance(msg, HumanMessage):
                             serializable_messages.append({'type': 'human', 'content': msg.content})
-                        elif isinstance(msg, AIMessage):
-                            serializable_messages.append({'type': 'ai', 'content': "Response Keywords : " + req_data["keywords"]})
+                        # elif isinstance(msg, AIMessage):
+                        #     serializable_messages.append({'type': 'ai', 'content': msg.content})
 
                     # === Step 5 : Update the response future of the processed request id with AI generated response and updated user memory ===
                     if req_id in response_futures:
                         response_futures[req_id].set_result({
                             'response': response_text,
-                            'updated_chat_messages': serializable_messages
+                            'updated_chat_messages': serializable_messages,
                         })
                         print(f" [Batch] Set result for request_id: {req_id} with updated messages.")
                     else:
@@ -142,6 +139,7 @@ class BatchProcessor:
             Returns (status, result_data/error_message).
         """
         future = response_futures.get(request_id)
+        print(response_futures,request_id)
 
         if not future:
             return "not_found", "Request ID not found or already processed"

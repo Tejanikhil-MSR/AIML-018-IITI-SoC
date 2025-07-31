@@ -28,7 +28,7 @@ class RAGChainBuilder:
 
         self.augment_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
 
-    def augment_prompt_with_context(self, user_query: str, user_memory: ConversationBufferMemory, label: str | None = None) -> tuple[str, str, str]:
+    def augment_prompt_with_context(self, user_query: str, user_memory: ConversationBufferMemory, label: str | None = None) -> tuple[str, list, list]:
         """
         Retrieves the documents via the provided retriever and formats the prompt.
 
@@ -56,12 +56,9 @@ class RAGChainBuilder:
             "chat_history": user_memory.chat_memory.messages
         }
 
-        # print(f"Retrieved Reference Links: {docs_result['reference_links']}")
-        # print(f"Retrieved Keywords: {docs_result.get('keywords', 'N/A')}")
-
         prompt_value = self.augment_prompt.invoke(temp_chain_data)
 
-        return prompt_value.to_string(), docs_result["reference_links"], docs_result.get("keywords_concat", "")
+        return prompt_value.to_string(), docs_result["reference_links"], docs_result.get("keywords", [])
 
 
 # custom_system_prompt = "You are a helpful assistant."

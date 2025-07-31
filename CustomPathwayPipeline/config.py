@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 from dataclasses import dataclass, field # dataclasses are great for configuration groups
 
-
 @dataclass
 class ModelConfig:
     """Configuration for Language Models."""
@@ -16,7 +15,7 @@ class ModelConfig:
     DEVICE: str = "cuda"  # Default, will try to fall back to CPU
     
     GENERATION_ARGS: dict = field(default_factory=lambda: {
-        "max_new_tokens": 200,
+        "max_new_tokens": 1000,
         "do_sample": True,
         "temperature": 0.7,
         "top_p": 0.9,
@@ -32,7 +31,7 @@ class PathwayConfig:
     DEFAULT_REF_LINK: str = "www.iiti.ac.in"  # Default reference link if metadata is missing
     EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"  # Or use 'bge-large-en-v1.5'
     CACHE_DIR: str = "./Cache"
-    k: int = 3
+    k: int = 1 # For defining number of documents for retrieval
 
 @dataclass
 class DataConfig:
@@ -94,17 +93,18 @@ Table or text chunk : {element}
 """
 
     # Using multiline string for readability of the template
-    PROMPT_TEMPLATE: str = f"""
+    PROMPT_TEMPLATE: str = """
 [INST]
-You are a AI bot responding to the user for the question - {{question}} given the context {{context}} with the previous conversations {{chat_history}}.
+You are a AI bot responding to the user for the request - {question} given the context {context} with the previous conversations {chat_history}.
 
 **Additional Info**
-- Current Date : {{current_date}}
+- Current Date : {current_date}
 <<SYS>>
 **Important Note** :
 - Only use the context and the chat history to answer. If you don't know the answer, say so politely.
-- Ask the user to check the College website for more information {{reference_links}} if you feel that the context is time sensitive.
-- Only specify the time/date if the venue/date specified in the context is near to the current date, else ask them to check the website.
+- Ask the user to check the College website for more information {reference_links} if you feel that the context is time sensitive.
+- Only specify the time/date if the venue/date specified in the context (1 to 2 weeks is fine) is near to the current date, else ask them to check the website.
+Note : I want you to give more weightage to the current request and exponentially decrease the weightage for the previous user requests
 <</SYS>>
 [/INST]
 """
