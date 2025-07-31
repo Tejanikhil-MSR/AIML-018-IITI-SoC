@@ -22,7 +22,11 @@ class LLMModelLoader:
 
         self.model = self._load_model()
 
+        print(f"Loaded model: {self.model_name}")
+        print(f"Max input tokens: {self.tokenizer.model_max_length}")
+
         self.generation_args = generation_args.copy()
+        
         self.generation_args["pad_token_id"] = self.tokenizer.eos_token_id
 
     def _load_tokenizer(self):
@@ -89,6 +93,7 @@ class LLMModelLoader:
             decoded_responses.append(response_text)
 
         print(f" [Batch] Finished processing batch.")
+        print(decoded_responses)
         return decoded_responses
 
 # llm_model_loader = LLMModelLoader()

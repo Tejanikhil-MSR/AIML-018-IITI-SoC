@@ -170,6 +170,7 @@ def chat():
         send_offs = config.CONVERSATION.SEND_OFF_LABELS
 
         if query_lower in [g.lower().strip() for g in greetings + send_offs]:
+            print("detected as a greeting or send-off query")
             response = handle_direct_response(user_message, user_memory) 
             return jsonify({"status": "completed", "response": response}), 200
 

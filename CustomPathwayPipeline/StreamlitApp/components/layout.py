@@ -56,5 +56,5 @@ def render_styles():
     """, unsafe_allow_html=True)
 
 def render_header():
-    st.markdown("<h1 style='color:#d17a22;'>🤖 College Bot</h1>", unsafe_allow_html=True) # Changed color here too
-    st.markdown("<p style='color:#5d4037;'>Ask me anything about your campus!</p>", unsafe_allow_html=True) # Changed color here too
+    st.markdown("<h1 style='color:#d17a22;'>🤖 IITI Bot</h1>", unsafe_allow_html=True) # Changed color here too
+    st.markdown("<p style='color:#5d4037;'>Ask me anything about IIT Indore campus!</p>", unsafe_allow_html=True) # Changed color here too

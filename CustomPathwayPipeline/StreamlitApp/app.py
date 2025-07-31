@@ -12,7 +12,7 @@ from components.session import init_session_variables, add_message, get_chat_his
 from frontend_config import POLLING_INTERVAL_SECONDS
 
 # === Setup ===
-st.set_page_config(page_title="College Chatbot", layout="centered")
+st.set_page_config(page_title="IITI Chatbot", layout="centered")
 render_styles()
 render_header()
 
